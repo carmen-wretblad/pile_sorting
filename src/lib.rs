@@ -1,3 +1,6 @@
+#![allow(dead_code)]
+
+pub type Move = [u8; 2];
 pub fn add(left: usize, right: usize) -> usize {
     left + right
 }
