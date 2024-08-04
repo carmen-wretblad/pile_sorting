@@ -10,10 +10,10 @@ pub struct Board {
     pub position_translator: Vec<u8>,
     pub nbr_cards: u8,
     pub solution_pile_pos: Option<u8>,
-    used_piles: u8,
+    pub non_empty_piles: u8,
 }
 impl Board {
-    fn new(pile: &Vec<u8>, nbr_piles: u8) -> Board {
+    pub fn new(pile: &Vec<u8>, nbr_piles: u8) -> Board {
         assert!(pile.len() > 2);
         assert!(nbr_piles > 2);
 
@@ -46,7 +46,7 @@ impl Board {
             position_translator: new_position_translator,
             nbr_cards: u8::try_from(new_nbr_cards).unwrap(),
             solution_pile_pos: new_solution_pile_pos,
-            used_piles: 1,
+            non_empty_piles: 1,
         }
     }
     fn valid_moves(&self) -> Vec<u8> {
@@ -60,14 +60,13 @@ impl Board {
         unimplemented!();
     }
     fn solved(&self) -> bool {
-        unimplemented!()
+        (self.non_empty_piles == 0) && (self.piles[0] == vec![2, 1])
     }
 }
 #[cfg(test)]
-mod tests {
-    use std::vec;
-
+pub mod tests {
     use super::*;
+    use std::vec;
 
     #[test]
     fn new_board() {

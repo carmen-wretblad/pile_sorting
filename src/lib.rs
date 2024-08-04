@@ -16,5 +16,5 @@ mod tests {
     }
 }
 
-mod board;
+pub mod board;
 pub mod program;
