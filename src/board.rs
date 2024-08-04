@@ -14,8 +14,8 @@ pub struct Board {
 }
 impl Board {
     fn new(pile: &Vec<u8>, nbr_piles: u8) -> Board {
-        debug_assert!(pile.len() > 1);
-        debug_assert!(nbr_piles > 2);
+        assert!(pile.len() > 2);
+        assert!(nbr_piles > 2);
 
         let mut new_piles = Vec::new();
         new_piles.push(pile.clone());
@@ -34,10 +34,10 @@ impl Board {
             new_solution_pile_pos = Some(0);
         }
 
-        while new_piles[0][0] == new_piles[0][1] + 1 {
+        while (new_piles[0][0] == new_piles[0][1] + 1) && (new_piles[0][1] == new_piles[0][2] + 1) {
             new_piles[0].remove(0);
-            new_nbr_cards = new_nbr_cards - 1;
-            if new_nbr_cards == 1 {
+            new_nbr_cards -= 1;
+            if new_nbr_cards == 2 {
                 break;
             }
         }
@@ -61,5 +61,36 @@ impl Board {
     }
     fn solved(&self) -> bool {
         unimplemented!()
+    }
+}
+#[cfg(test)]
+mod tests {
+    use std::vec;
+
+    use super::*;
+
+    #[test]
+    fn new_board() {
+        {
+            let input = vec![4, 3, 2, 1];
+            let expected = vec![2, 1];
+
+            let board: Board = Board::new(&input, 4);
+            assert_eq!(board.piles[0], expected);
+        }
+        {
+            let input = vec![1, 2, 3, 4];
+            let expected = vec![1, 2, 3, 4];
+
+            let board: Board = Board::new(&input, 4);
+            assert_eq!(board.piles[0], expected)
+        }
+        {
+            let input = vec![8, 7, 6, 5, 1, 2, 3, 4];
+            let expected = vec![6, 5, 1, 2, 3, 4];
+
+            let board = Board::new(&input, 7);
+            assert_eq!(board.piles[0], expected)
+        }
     }
 }

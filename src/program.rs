@@ -9,9 +9,7 @@
 // ### TODO ###
 // Implement "Solution"
 type Move = [u8; 2];
-pub struct Board {}
-struct Info {}
-
+use crate::board::*;
 pub trait Program {
     fn starting_state(&self) -> &Board;
     fn done(&self) -> bool;
