@@ -109,7 +109,6 @@ impl Board {
         let card = self.piles[from_abs].pop().unwrap();
         self.piles[to_abs].push(card);
         if self.piles[to_abs].len() == 1 || (self.piles[from_abs].len() == 0) {
-            if self.piles[from_abs].len() == 0 {}
             self.update_indexes();
         }
 
