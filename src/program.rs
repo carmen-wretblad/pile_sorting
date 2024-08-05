@@ -8,9 +8,8 @@
 // smallest amount of signals to get it to move from one state to another
 // ### TODO ###
 // Implement "Solution"
-type Move = [u8; 2];
-use crate::board::*;
-pub trait Program {
+use crate::{board::*, Move};
+pub trait Program: Iterator {
     fn starting_state(&self) -> &Board;
     fn done(&self) -> bool;
     /// Runs the program until a new Move has been reached, must change result of done method when
@@ -36,14 +35,4 @@ pub struct BFS {
     starting_board: Board,
     moves: Vec<Move>,
     done_flag: bool,
-}
-impl BFS {
-    fn new(name: String, starting_board: Board) -> Self {
-        BFS {
-            name,
-            starting_board,
-            moves: Vec::<Move>::new(),
-            done_flag: unimplemented!(),
-        }
-    }
 }
