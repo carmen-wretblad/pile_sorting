@@ -14,7 +14,7 @@ pub struct Board {
     pub solution_pile_pos: Option<usize>, // make bool
 }
 impl Board {
-    pub fn new(pile: &Vec<u8>, nbr_piles: usize) -> Board {
+    pub fn new(pile: &[u8], nbr_piles: usize) -> Board {
         assert!(pile.len() > 2);
         assert!(nbr_piles > 2);
 
@@ -23,7 +23,7 @@ impl Board {
         let mut new_nbr_cards = pile.len();
         let mut new_solution_pile_pos = None;
 
-        new_piles.push(pile.clone());
+        new_piles.push(pile.to_owned());
         for _ in 1..nbr_piles {
             new_piles.push(Vec::<u8>::new());
         }
@@ -116,7 +116,11 @@ impl Board {
             self.solution_pile_pos = Some(usize::from(card));
         }
 
-        if to_rel == 0 && Option::is_some(&self.solution_pile_pos) && (self.piles[to_abs].len() == 3) && (self.piles[to_abs][1] == card + 1) {
+        if to_rel == 0
+            && Option::is_some(&self.solution_pile_pos)
+            && (self.piles[to_abs].len() == 3)
+            && (self.piles[to_abs][1] == card + 1)
+        {
             self.piles[to_abs].remove(0);
             self.nbr_cards -= 1;
         }
