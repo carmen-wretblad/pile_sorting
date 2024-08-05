@@ -108,7 +108,7 @@ impl Board {
         );
         let card = self.piles[from_abs].pop().unwrap();
         self.piles[to_abs].push(card);
-        if self.piles[to_abs].len() == 1 || (self.piles[from_abs].len() == 0) {
+        if self.piles[to_abs].len() == 1 || (self.piles[from_abs].is_empty()) {
             self.update_indexes();
         }
 
@@ -116,11 +116,9 @@ impl Board {
             self.solution_pile_pos = Some(usize::from(card));
         }
 
-        if to_rel == 0 && Option::is_some(&self.solution_pile_pos) {
-            if (self.piles[to_abs].len() == 3) && (self.piles[to_abs][1] == card + 1) {
-                self.piles[to_abs].remove(0);
-                self.nbr_cards -= 1;
-            }
+        if to_rel == 0 && Option::is_some(&self.solution_pile_pos) && (self.piles[to_abs].len() == 3) && (self.piles[to_abs][1] == card + 1) {
+            self.piles[to_abs].remove(0);
+            self.nbr_cards -= 1;
         }
     }
 
