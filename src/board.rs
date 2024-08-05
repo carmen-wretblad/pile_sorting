@@ -6,6 +6,7 @@ use std::{u8, usize};
 // no "pastmove"
 // should moves have usize or u8?
 use crate::Move;
+#[derive(Debug)]
 pub struct Board {
     pub piles: Vec<Vec<u8>>,
     pub abs_to_rel_translator: Vec<usize>,
@@ -72,7 +73,10 @@ impl Board {
             }
         }
 
-        let valid_moves = valid_moves.into_iter().filter(|x| x[0] != x[1]);
+        let valid_moves = valid_moves
+            .into_iter()
+            .filter(|x| x[0] != x[1])
+            .map(|x| self.abs_to_rel_move(x));
 
         // doesn't take from empty pile
         // doesn't put in empty pile except first one
@@ -96,12 +100,19 @@ impl Board {
         let to_abs = self.rel_to_abs(to_rel);
 
         assert!(!self.piles[from_abs].is_empty());
-        assert!(self.valid_moves().contains(&move_command));
+        assert!(
+            self.valid_moves().contains(&move_command),
+            "move command {:?}, wasn't contained in valid commands: {:?}",
+            move_command,
+            self.valid_moves()
+        );
         let card = self.piles[from_abs].pop().unwrap();
         self.piles[to_abs].push(card);
         if self.piles[to_abs].len() == 1 || (self.piles[from_abs].len() == 0) {
+            if self.piles[from_abs].len() == 0 {}
             self.update_indexes();
         }
+
         if usize::from(card) == self.nbr_cards && self.piles[to_abs].len() == 1 {
             self.solution_pile_pos = Some(usize::from(card));
         }
@@ -110,8 +121,6 @@ impl Board {
             if (self.piles[to_abs].len() == 3) && (self.piles[to_abs][1] == card + 1) {
                 self.piles[to_abs].remove(0);
                 self.nbr_cards -= 1;
-            } else {
-                self.solution_pile_pos = None;
             }
         }
     }
@@ -126,6 +135,9 @@ impl Board {
     fn abs_to_rel(&self, abs_val: usize) -> usize {
         self.abs_to_rel_translator[abs_val]
     }
+    fn abs_to_rel_move(&self, abs_move: Move) -> Move {
+        [self.abs_to_rel(abs_move[0]), self.abs_to_rel(abs_move[1])]
+    }
 
     fn rel_to_abs(&self, rel_val: usize) -> usize {
         for (i, el) in self.abs_to_rel_translator.iter().enumerate() {
@@ -135,6 +147,10 @@ impl Board {
         }
         panic!();
     }
+    fn rel_to_abs_move(&self, rel_move: Move) -> Move {
+        [self.rel_to_abs(rel_move[0]), self.rel_to_abs(rel_move[1])]
+    }
+
     fn update_indexes(&mut self) {
         let mut non_empty_piles = Vec::<usize>::new();
         let mut empty_piles = Vec::<usize>::new();
@@ -146,15 +162,20 @@ impl Board {
                 non_empty_piles.push(i);
             }
         }
-        non_empty_piles.sort_by(|a, b| self.piles[*a][0].cmp(&self.piles[*b][0]));
+        non_empty_piles.sort_by(|a, b| self.piles[*b][0].cmp(&self.piles[*a][0]));
         let mut counter = 0;
-        for pile in non_empty_piles {
-            self.abs_to_rel_translator[pile] = counter;
+        for pile in &non_empty_piles {
+            self.abs_to_rel_translator[*pile] = counter;
             counter += 1;
         }
         for pile in empty_piles {
             self.abs_to_rel_translator[pile] = counter;
             counter += 1;
+        }
+        if usize::from(self.piles[non_empty_piles[0]][0]) == self.nbr_cards {
+            self.solution_pile_pos = Some(self.rel_to_abs(0));
+        } else {
+            self.solution_pile_pos = None
         }
         // order rel based on highest card
     }
@@ -187,5 +208,25 @@ pub mod tests {
             let board = Board::new(&input, 7);
             assert_eq!(board.piles[0], expected)
         }
+    }
+    #[test]
+    fn printing_test() {
+        let input = vec![1, 2, 3, 4, 5];
+        let mut board = Board::new(&input, 4);
+        println!("{:?}", &board);
+        println!("{:?}", board.valid_moves());
+        board.perform_move([0, 1]);
+        println!("{:?}", &board);
+        board.perform_move([1, 0]);
+        println!("{:?}", &board);
+        board.perform_move([1, 2]);
+        println!("{:?}", &board);
+        board.perform_move([1, 0]);
+        println!("{:?}", &board);
+        board.perform_move([1, 0]);
+        println!("{:?}", &board);
+        board.perform_move([1, 0]);
+        println!("{:?}", &board);
+        println!("{:?}", board.solved())
     }
 }
