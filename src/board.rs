@@ -60,10 +60,24 @@ impl Board {
                 non_empty_piles.push(i);
             }
         }
+        let valid_from = non_empty_piles.clone();
+        let mut valid_to = non_empty_piles.clone();
+        if !empty_piles.is_empty() {
+            valid_to.push(*empty_piles.first().unwrap());
+        }
+        let mut valid_moves = Vec::<Move>::new();
+        for from in &valid_from {
+            for to in &valid_to {
+                valid_moves.push([*from, *to])
+            }
+        }
+
+        let valid_moves = valid_moves.into_iter().filter(|x| x[0] != x[1]);
+
         // doesn't take from empty pile
         // doesn't put in empty pile except first one
         // doesn't take from one pile and put into same
-        unimplemented!();
+        Vec::from_iter(valid_moves)
     }
 
     fn good_moves(&self) -> Vec<Move> {
@@ -122,7 +136,26 @@ impl Board {
         panic!();
     }
     fn update_indexes(&mut self) {
-        unimplemented!();
+        let mut non_empty_piles = Vec::<usize>::new();
+        let mut empty_piles = Vec::<usize>::new();
+
+        for (i, el) in self.piles.iter().enumerate() {
+            if el.is_empty() {
+                empty_piles.push(i);
+            } else {
+                non_empty_piles.push(i);
+            }
+        }
+        non_empty_piles.sort_by(|a, b| self.piles[*a][0].cmp(&self.piles[*b][0]));
+        let mut counter = 0;
+        for pile in non_empty_piles {
+            self.abs_to_rel_translator[pile] = counter;
+            counter += 1;
+        }
+        for pile in empty_piles {
+            self.abs_to_rel_translator[pile] = counter;
+            counter += 1;
+        }
         // order rel based on highest card
     }
 }
