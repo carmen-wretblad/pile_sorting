@@ -7,14 +7,17 @@ use std::{u8, usize};
 // should moves have usize or u8?
 use crate::Move;
 #[derive(Debug)]
+/// Representation of a full set of cardpiles.
+/// Piles are always sorted in order of the value of the bottom card, highest to lowest.
 pub struct Board {
     pub piles: Vec<Vec<u8>>,
-    pub abs_to_rel_translator: Vec<usize>,
+    abs_to_rel_translator: Vec<usize>,
     pub nbr_cards: usize,
-    pub solution_pile_pos: Option<usize>, // make bool
-    pub last_move: Option<Move>,
+    solution_pile_pos: Option<usize>, // make bool
+    last_move: Option<Move>,
 }
 impl Board {
+    /// Creates a new Board, with all cards placed in the 0th pile.
     pub fn new(pile: &[u8], nbr_piles: usize) -> Board {
         assert!(pile.len() > 2);
         assert!(nbr_piles > 2);
@@ -52,7 +55,9 @@ impl Board {
             last_move: None,
         }
     }
-    fn valid_moves(&self) -> Vec<Move> {
+    /// Gives all moves that may be performed that yields a valid state,
+    /// performing any other move will cause a panic.
+    pub fn valid_moves(&self) -> Vec<Move> {
         let mut non_empty_piles = Vec::<usize>::new();
         let mut empty_piles = Vec::<usize>::new();
 
@@ -86,7 +91,8 @@ impl Board {
         Vec::from_iter(valid_moves)
     }
 
-    fn good_moves(&self) -> Vec<Move> {
+    /// Returns all relative moves that may lead to a better solution.
+    pub fn good_moves(&self) -> Vec<Move> {
         assert!(!self.solved());
         let mut valid_moves = self.valid_moves();
         assert!(!valid_moves.is_empty());
@@ -128,7 +134,8 @@ impl Board {
         true
     }
 
-    fn perform_move(&mut self, move_command: Move) {
+    /// Performs a move. Move instructions are "relative".
+    pub fn perform_move(&mut self, move_command: Move) {
         // seperate into move and place logic?
 
         let from_rel = move_command[0];
@@ -145,6 +152,7 @@ impl Board {
             move_command,
             self.valid_moves()
         );
+
         let card = self.piles[from_abs].pop().unwrap();
         self.piles[to_abs].push(card);
         if self.piles[to_abs].len() == 1 || (self.piles[from_abs].is_empty()) {
@@ -164,8 +172,9 @@ impl Board {
             self.nbr_cards -= 1;
         }
     }
-
-    fn solved(&self) -> bool {
+    /// A solved pile will be identical to a pile with the cards \[2,1\] in one pile and no other
+    /// cards.
+    pub fn solved(&self) -> bool {
         match self.solution_pile_pos {
             Some(pile_nbr) => self.piles[pile_nbr] == vec![2, 1], //is
             //this enought?
