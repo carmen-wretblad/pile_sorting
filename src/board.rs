@@ -12,6 +12,7 @@ pub struct Board {
     pub abs_to_rel_translator: Vec<usize>,
     pub nbr_cards: usize,
     pub solution_pile_pos: Option<usize>, // make bool
+    pub last_move: Option<Move>,
 }
 impl Board {
     pub fn new(pile: &[u8], nbr_piles: usize) -> Board {
@@ -48,6 +49,7 @@ impl Board {
             abs_to_rel_translator: new_position_translator,
             nbr_cards: new_nbr_cards,
             solution_pile_pos: new_solution_pile_pos,
+            last_move: None,
         }
     }
     fn valid_moves(&self) -> Vec<Move> {
@@ -85,12 +87,47 @@ impl Board {
     }
 
     fn good_moves(&self) -> Vec<Move> {
+        assert!(!self.solved());
+        let mut valid_moves = self.valid_moves();
+        assert!(!valid_moves.is_empty());
+
+        valid_moves = Vec::from_iter(
+            valid_moves
+                .into_iter()
+                .map(|x| self.rel_to_abs_move(x))
+                .filter(|x| self.not_last_move(x)),
+        );
+        if Option::is_some(&self.solution_pile_pos) {
+            let solution_pile = self
+                .solution_pile_pos
+                .expect("Optional must be some for the if statement");
+
+            for (i, el) in self.piles.iter().enumerate() {
+                if usize::from(el[el.len() - 1]) == self.nbr_cards - 2 {
+                    return vec![[i, 0]];
+                }
+            }
+            valid_moves = Vec::from_iter(valid_moves.into_iter().filter(|x| x[0] != solution_pile));
+        }
+
         // does'nt put back card it just grabbed
         // doesn't move cards away from solutionpile
         // doesn't put bad cards on solutionpile (???)
         // always put good card on solutionpile
-        unimplemented!();
+        assert!(!valid_moves.is_empty());
+        Vec::from_iter(valid_moves.into_iter().map(|x| self.abs_to_rel_move(x)))
     }
+    fn not_last_move(&self, move_command: &Move) -> bool {
+        if Option::is_none(&self.last_move) {
+            return true;
+        }
+        let last_move = self.last_move.unwrap();
+        if (move_command[0] == last_move[1]) && (move_command[1] == last_move[0]) {
+            return false;
+        }
+        true
+    }
+
     fn perform_move(&mut self, move_command: Move) {
         // seperate into move and place logic?
 
@@ -98,6 +135,8 @@ impl Board {
         let to_rel = move_command[1];
         let from_abs = self.rel_to_abs(from_rel);
         let to_abs = self.rel_to_abs(to_rel);
+
+        self.last_move = Some([from_abs, to_abs]);
 
         assert!(!self.piles[from_abs].is_empty());
         assert!(
