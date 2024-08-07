@@ -333,7 +333,7 @@ pub mod tests {
     where
         T: Hash,
     {
-        let mut hasher = DefaultHasher::new();
+        let mut hasher = fxhash::FxHasher::default();
         obj.hash(&mut hasher);
         hasher.finish()
     }
@@ -359,6 +359,7 @@ pub mod tests {
         board1.perform_move([0, 1]); //[4][1,2,3]
         board2.perform_move([0, 1]); //[3][1,2,4]
         assert_ne!(format!("{}", board1), format!("{}", board2));
+
         println!("{board1} != {board2} ");
         board1.perform_move([1, 2]); //[4][3][1,2]
         board2.perform_move([1, 2]); //[4][3][1,2]
