@@ -6,6 +6,8 @@ use std::{u8, usize};
 // no "pastmove"
 // should moves have usize or u8?
 // Look into the possibility of using mem::swap for replacing values
+// Abs vs Rel moves
+// const solutionpile
 use crate::Move;
 #[derive(Debug)]
 /// Representation of a full set of cardpiles.
@@ -56,9 +58,10 @@ impl Board {
             last_move: None,
         }
     }
-    /// Gives all moves that may be performed that yields a valid state,
+    /// Gives all moves(absolute) that may be performed that yields a valid state,
     /// performing any other move will cause a panic.
-    pub fn valid_moves(&self) -> Vec<Move> {
+    pub fn valid_moves_abs(&self) -> Vec<Move> {
+        // TODO: make this more legible?
         let mut non_empty_piles = Vec::<usize>::new();
         let mut empty_piles = Vec::<usize>::new();
 
@@ -69,6 +72,7 @@ impl Board {
                 non_empty_piles.push(i);
             }
         }
+
         let valid_from = non_empty_piles.clone();
         let mut valid_to = non_empty_piles.clone();
         if !empty_piles.is_empty() {
@@ -85,40 +89,38 @@ impl Board {
         // doesn't put in empty pile except first one
         // doesn't take from one pile and put into same
         valid_moves
-            .iter_mut()
-            .for_each(|x| *x = self.abs_to_rel_move(*x));
-        valid_moves
+    }
+    fn valid_moves_rel(&self) -> Vec<Move> {
+        let mut moves = self.valid_moves_abs();
+        moves.iter_mut().for_each(|x| *x = self.abs_to_rel_move(*x));
+        moves
     }
 
-    /// Returns all relative moves that may lead to a better solution.
-    pub fn good_moves(&self) -> Vec<Move> {
+    /// Returns all moves(relative) that may lead to a better solution.
+    pub fn good_moves_rel(&self) -> Vec<Move> {
         assert!(!self.solved());
-        let mut valid_moves = self.valid_moves();
+        let mut valid_moves = self.valid_moves_abs();
         assert!(!valid_moves.is_empty());
+        valid_moves.retain(|x| self.not_last_move(x)); // you never need to undo the last move.
+        valid_moves.retain(|x| x[0] != x[1]); /* picking up and putting down a card in the same
+                                              // place is meaningless */
 
-        valid_moves
-            .iter_mut()
-            .for_each(|x| *x = self.rel_to_abs_move(*x));
-        valid_moves.retain(|x| self.not_last_move(x));
-        valid_moves.retain(|x| x[0] != x[1]);
-
-        if Option::is_some(&self.solution_pile_pos) {
-            let solution_pile = self
-                .solution_pile_pos
-                .expect("Optional must be some for the if statement");
-
-            for (i, el) in self.piles.iter().enumerate() {
-                if usize::from(el[el.len() - 1]) == self.nbr_cards - 2 {
-                    return vec![[i, 0]];
+        match &self.solution_pile_pos {
+            Some(pile_pos) => {
+                for (i, el) in self.piles.iter().enumerate() {
+                    if usize::from(el[el.len() - 1]) == self.nbr_cards - 2 {
+                        return vec![[i, 0]]; /* if we can put the next card for the solutionpile is
+                                             // exposed, putting it on the solutionpile is the only logical move */
+                    }
                 }
+                valid_moves.retain(|x| x[0] != *pile_pos) //we never want to remove cards from a
+                                                          //solution-pile
             }
-            valid_moves.retain(|x| x[0] != solution_pile)
+            None => (),
         }
 
-        // does'nt put back card it just grabbed
-        // doesn't move cards away from solutionpile
-        // doesn't put bad cards on solutionpile (???)
-        // always put good card on solutionpile
+        /* Speculated but not implemented: doesn't put bad cards on solutionpile.
+        not sure if there are cases where such a reshuffle is required or not */
         assert!(!valid_moves.is_empty());
         valid_moves
             .iter_mut()
@@ -149,10 +151,11 @@ impl Board {
 
         assert!(!self.piles[from_abs].is_empty());
         assert!(
-            self.valid_moves().contains(&move_command),
-            "move command {:?}, wasn't contained in valid commands: {:?}",
+            self.valid_moves_rel().contains(&move_command),
+            "move command {:?}, wasn't contained in valid commands: {:?} (rel) || {:?} (abs)",
             move_command,
-            self.valid_moves()
+            self.valid_moves_rel(),
+            self.valid_moves_abs(),
         );
 
         let card = self.piles[from_abs].pop().unwrap();
@@ -265,7 +268,7 @@ pub mod tests {
         let input = vec![1, 2, 3, 4, 5];
         let mut board = Board::new(&input, 4);
         println!("{:?}", &board);
-        println!("{:?}", board.valid_moves());
+        println!("{:?}", board.valid_moves_abs());
         board.perform_move([0, 1]);
         println!("{:?}", &board);
         board.perform_move([1, 0]);
