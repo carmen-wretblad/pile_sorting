@@ -23,6 +23,7 @@ pub struct Board {
     solution_pile_pos: Option<usize>, // make bool
     last_move: Option<Move>,
 }
+/// Hashing is based on relative pile positions
 impl Hash for Board {
     fn hash<H: Hasher>(&self, state: &mut H) {
         let mut id: Vec<u8> = Vec::new();
@@ -40,26 +41,32 @@ impl Hash for Board {
         id.hash(state)
     }
 }
+/// Displays the Board based on relative pile position
 impl fmt::Display for Board {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let mut pile_ids: Vec<usize> = Vec::new();
 
-        for i in 0..self.piles.len() - 1 {
+        for i in 0..self.piles.len() {
             pile_ids.push(i);
         }
         pile_ids.iter_mut().for_each(|x| *x = self.rel_to_abs(*x));
         write!(f, "<")?;
         for i in pile_ids {
-            write!(f, "[")?;
             let mut pile = self.piles[i].clone();
-            let last = pile.pop();
-            for card in pile.iter() {
-                write!(f, "{} ", card)?;
+            if !pile.is_empty() {
+                write!(f, "[")?;
+
+                let last = pile.pop();
+                for card in pile.iter() {
+                    write!(f, "{} ", card)?;
+                }
+                if Option::is_some(&last) {
+                    write!(f, "{}", last.unwrap())?;
+                }
+                write!(f, "]")?;
+            } else {
+                write!(f, " _")?;
             }
-            if Option::is_some(&last) {
-                write!(f, "{}", last.unwrap())?;
-            }
-            write!(f, "]")?;
         }
         write!(f, ">")
     }
@@ -106,7 +113,7 @@ impl Board {
     }
     /// Gives all moves(absolute) that may be performed that yields a valid state,
     /// performing any other move will cause a panic.
-    pub fn valid_moves_abs(&self) -> Vec<Move> {
+    fn valid_moves_abs(&self) -> Vec<Move> {
         // TODO: make this more legible?
         let mut non_empty_piles = Vec::<usize>::new();
         let mut empty_piles = Vec::<usize>::new();
@@ -136,7 +143,7 @@ impl Board {
         // doesn't take from one pile and put into same
         valid_moves
     }
-    fn valid_moves_rel(&self) -> Vec<Move> {
+    pub fn valid_moves_rel(&self) -> Vec<Move> {
         let mut moves = self.valid_moves_abs();
         moves.iter_mut().for_each(|x| *x = self.abs_to_rel_move(*x));
         moves
