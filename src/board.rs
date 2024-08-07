@@ -314,26 +314,7 @@ pub mod tests {
             assert_eq!(board.piles[0], expected)
         }
     }
-    #[test]
-    fn printing_test() {
-        let input = vec![1, 2, 3, 4, 5];
-        let mut board = Board::new(&input, 4);
-        println!("{:?}", &board);
-        println!("{:?}", board.valid_moves_abs());
-        board.perform_move([0, 1]);
-        println!("{:?}", &board);
-        board.perform_move([1, 0]);
-        println!("{:?}", &board);
-        board.perform_move([1, 2]);
-        println!("{:?}", &board);
-        board.perform_move([1, 0]);
-        println!("{:?}", &board);
-        board.perform_move([1, 0]);
-        println!("{:?}", &board);
-        board.perform_move([1, 0]);
-        println!("{:?}", &board);
-        println!("{:?}", board.solved())
-    }
+
     fn get_hash<T>(obj: &T) -> u64
     where
         T: Hash,
@@ -347,27 +328,36 @@ pub mod tests {
     fn hash_test() {
         let mut board1 = Board::new(&vec![1, 2, 3, 4], 4);
         let mut board2 = Board::new(&vec![1, 2, 4, 3], 4);
+
         assert_ne!(get_hash(&board1), get_hash(&board2));
+
         board1.perform_move([0, 1]); //[4][1,2,3]
         board2.perform_move([0, 1]); //[3][1,2,4]
+
         assert_ne!(get_hash(&board1), get_hash(&board2));
+
         board1.perform_move([1, 2]); //[4][3][1,2]
         board2.perform_move([1, 2]); //[4][3][1,2]
+
         assert_eq!(get_hash(&board1), get_hash(&board2));
     }
     #[test]
     fn display_test() {
         let mut board1 = Board::new(&vec![1, 2, 3, 4], 4);
         let mut board2 = Board::new(&vec![1, 2, 4, 3], 4);
+
         assert_ne!(format!("{}", board1), format!("{}", board2));
         println!("{board1} != {board2} ");
+
         board1.perform_move([0, 1]); //[4][1,2,3]
         board2.perform_move([0, 1]); //[3][1,2,4]
-        assert_ne!(format!("{}", board1), format!("{}", board2));
 
+        assert_ne!(format!("{}", board1), format!("{}", board2));
         println!("{board1} != {board2} ");
+
         board1.perform_move([1, 2]); //[4][3][1,2]
         board2.perform_move([1, 2]); //[4][3][1,2]
+
         assert_eq!(format!("{}", board1), format!("{}", board2));
         println!("{board1} == {board2} ");
     }
