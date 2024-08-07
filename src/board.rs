@@ -1,5 +1,6 @@
+use core::fmt;
 use core::panic;
-use std::{u8, usize};
+use std::{fmt::Display, u8, usize};
 // TODO:
 // figure out to hash it
 // display
@@ -9,7 +10,9 @@ use std::{u8, usize};
 // Abs vs Rel moves
 // const solutionpile
 use crate::Move;
+use std::fmt::*;
 use std::hash::*;
+
 #[derive(Debug)]
 /// Representation of a full set of cardpiles.
 /// Piles are always sorted in order of the value of the bottom card, highest to lowest.
@@ -35,6 +38,30 @@ impl Hash for Board {
             id.push(0);
         }
         id.hash(state)
+    }
+}
+impl fmt::Display for Board {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let mut pile_ids: Vec<usize> = Vec::new();
+
+        for i in 0..self.piles.len() - 1 {
+            pile_ids.push(i);
+        }
+        pile_ids.iter_mut().for_each(|x| *x = self.rel_to_abs(*x));
+        write!(f, "<")?;
+        for i in pile_ids {
+            write!(f, "[")?;
+            let mut pile = self.piles[i].clone();
+            let last = pile.pop();
+            for card in pile.iter() {
+                write!(f, "{} ", card)?;
+            }
+            if Option::is_some(&last) {
+                write!(f, "{}", last.unwrap())?;
+            }
+            write!(f, "]")?;
+        }
+        write!(f, ">")
     }
 }
 
@@ -319,9 +346,23 @@ pub mod tests {
         board1.perform_move([0, 1]); //[4][1,2,3]
         board2.perform_move([0, 1]); //[3][1,2,4]
         assert_ne!(get_hash(&board1), get_hash(&board2));
-
         board1.perform_move([1, 2]); //[4][3][1,2]
         board2.perform_move([1, 2]); //[4][3][1,2]
         assert_eq!(get_hash(&board1), get_hash(&board2));
+    }
+    #[test]
+    fn display_test() {
+        let mut board1 = Board::new(&vec![1, 2, 3, 4], 4);
+        let mut board2 = Board::new(&vec![1, 2, 4, 3], 4);
+        assert_ne!(format!("{}", board1), format!("{}", board2));
+        println!("{board1} != {board2} ");
+        board1.perform_move([0, 1]); //[4][1,2,3]
+        board2.perform_move([0, 1]); //[3][1,2,4]
+        assert_ne!(format!("{}", board1), format!("{}", board2));
+        println!("{board1} != {board2} ");
+        board1.perform_move([1, 2]); //[4][3][1,2]
+        board2.perform_move([1, 2]); //[4][3][1,2]
+        assert_eq!(format!("{}", board1), format!("{}", board2));
+        println!("{board1} == {board2} ");
     }
 }
