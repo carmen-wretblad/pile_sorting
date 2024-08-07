@@ -1,26 +1,24 @@
+//  ##### TODO #######
+//
+// Look into the possibility of using mem::swap for replacing values
+// Consider tracking higest and lowest card for each pile
+//
+// ######
+use crate::Move;
 use core::fmt;
 use core::panic;
-use std::{u8, usize};
-// TODO:
-// figure out to hash it
-// display
-// no "pastmove"
-// should moves have usize or u8?
-// Look into the possibility of using mem::swap for replacing values
-// Abs vs Rel moves
-// const solutionpile
-use crate::Move;
 use std::fmt::*;
 use std::hash::*;
+use std::{u8, usize};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 /// Representation of a full set of cardpiles.
 /// Piles are always sorted in order of the value of the bottom card, highest to lowest.
 pub struct Board {
     pub piles: Vec<Vec<u8>>,
     abs_to_rel_translator: Vec<usize>,
     pub nbr_cards: usize,
-    solution_pile_pos: Option<usize>, // make bool
+    solution_pile_pos: Option<usize>,
     last_move: Option<Move>,
 }
 /// Hashing is based on relative pile positions
@@ -115,7 +113,6 @@ impl Board {
     /// Gives all moves(absolute) that may be performed that yields a valid state,
     /// performing any other move will cause a panic.
     fn valid_moves_abs(&self) -> Vec<Move> {
-        // TODO: make this more legible?
         let mut non_empty_piles = Vec::<usize>::new();
         let mut empty_piles = Vec::<usize>::new();
 
