@@ -5,6 +5,7 @@ use std::{u8, usize};
 // display
 // no "pastmove"
 // should moves have usize or u8?
+// Look into the possibility of using mem::swap for replacing values
 use crate::Move;
 #[derive(Debug)]
 /// Representation of a full set of cardpiles.
@@ -80,15 +81,13 @@ impl Board {
             }
         }
 
-        let valid_moves = valid_moves
-            .into_iter()
-            .filter(|x| x[0] != x[1])
-            .map(|x| self.abs_to_rel_move(x));
-
         // doesn't take from empty pile
         // doesn't put in empty pile except first one
         // doesn't take from one pile and put into same
-        Vec::from_iter(valid_moves)
+        valid_moves
+            .iter_mut()
+            .for_each(|x| *x = self.abs_to_rel_move(*x));
+        valid_moves
     }
 
     /// Returns all relative moves that may lead to a better solution.
@@ -97,12 +96,12 @@ impl Board {
         let mut valid_moves = self.valid_moves();
         assert!(!valid_moves.is_empty());
 
-        valid_moves = Vec::from_iter(
-            valid_moves
-                .into_iter()
-                .map(|x| self.rel_to_abs_move(x))
-                .filter(|x| self.not_last_move(x)),
-        );
+        valid_moves
+            .iter_mut()
+            .for_each(|x| *x = self.rel_to_abs_move(*x));
+        valid_moves.retain(|x| self.not_last_move(x));
+        valid_moves.retain(|x| x[0] != x[1]);
+
         if Option::is_some(&self.solution_pile_pos) {
             let solution_pile = self
                 .solution_pile_pos
@@ -113,7 +112,7 @@ impl Board {
                     return vec![[i, 0]];
                 }
             }
-            valid_moves = Vec::from_iter(valid_moves.into_iter().filter(|x| x[0] != solution_pile));
+            valid_moves.retain(|x| x[0] != solution_pile)
         }
 
         // does'nt put back card it just grabbed
@@ -121,7 +120,10 @@ impl Board {
         // doesn't put bad cards on solutionpile (???)
         // always put good card on solutionpile
         assert!(!valid_moves.is_empty());
-        Vec::from_iter(valid_moves.into_iter().map(|x| self.abs_to_rel_move(x)))
+        valid_moves
+            .iter_mut()
+            .for_each(|x| *x = self.abs_to_rel_move(*x));
+        valid_moves
     }
     fn not_last_move(&self, move_command: &Move) -> bool {
         if Option::is_none(&self.last_move) {
