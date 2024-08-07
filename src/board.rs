@@ -1,6 +1,6 @@
 use core::fmt;
 use core::panic;
-use std::{fmt::Display, u8, usize};
+use std::{u8, usize};
 // TODO:
 // figure out to hash it
 // display
