@@ -9,6 +9,7 @@ use std::{u8, usize};
 // Abs vs Rel moves
 // const solutionpile
 use crate::Move;
+use std::hash::*;
 #[derive(Debug)]
 /// Representation of a full set of cardpiles.
 /// Piles are always sorted in order of the value of the bottom card, highest to lowest.
@@ -19,6 +20,24 @@ pub struct Board {
     solution_pile_pos: Option<usize>, // make bool
     last_move: Option<Move>,
 }
+impl Hash for Board {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        let mut id: Vec<u8> = Vec::new();
+        let mut pile_ids: Vec<usize> = Vec::new();
+
+        for i in 0..self.piles.len() - 1 {
+            pile_ids.push(i);
+        }
+        pile_ids.iter_mut().for_each(|x| *x = self.rel_to_abs(*x));
+        for i in pile_ids {
+            let mut pile = self.piles[i].clone();
+            id.append(&mut pile);
+            id.push(0);
+        }
+        id.hash(state)
+    }
+}
+
 impl Board {
     /// Creates a new Board, with all cards placed in the 0th pile.
     pub fn new(pile: &[u8], nbr_piles: usize) -> Board {
@@ -282,5 +301,27 @@ pub mod tests {
         board.perform_move([1, 0]);
         println!("{:?}", &board);
         println!("{:?}", board.solved())
+    }
+    fn get_hash<T>(obj: &T) -> u64
+    where
+        T: Hash,
+    {
+        let mut hasher = DefaultHasher::new();
+        obj.hash(&mut hasher);
+        hasher.finish()
+    }
+
+    #[test]
+    fn hash_test() {
+        let mut board1 = Board::new(&vec![1, 2, 3, 4], 4);
+        let mut board2 = Board::new(&vec![1, 2, 4, 3], 4);
+        assert_ne!(get_hash(&board1), get_hash(&board2));
+        board1.perform_move([0, 1]); //[4][1,2,3]
+        board2.perform_move([0, 1]); //[3][1,2,4]
+        assert_ne!(get_hash(&board1), get_hash(&board2));
+
+        board1.perform_move([1, 2]); //[4][3][1,2]
+        board2.perform_move([1, 2]); //[4][3][1,2]
+        assert_eq!(get_hash(&board1), get_hash(&board2));
     }
 }
