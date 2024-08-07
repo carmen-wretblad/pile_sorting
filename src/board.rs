@@ -41,7 +41,8 @@ impl Hash for Board {
         id.hash(state)
     }
 }
-/// Displays the Board based on relative pile position
+/// Displays the Board based on relative pile position. A board will look similar to:
+/// ```<[5][4][1 2 3]_ _>``` when printed in the terminal
 impl fmt::Display for Board {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let mut pile_ids: Vec<usize> = Vec::new();
