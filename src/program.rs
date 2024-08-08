@@ -56,11 +56,12 @@ impl BFS {
         bfs
     }
     pub fn internal_step(&mut self) -> bool {
+        println!("{}", &self.current_boards.len());
         for board in &self.current_boards {
             for move_command in board.good_moves_rel() {
                 let mut newboard = board.clone();
                 newboard.perform_move(move_command);
-                println!("newboard is {newboard}");
+                //println!("newboard is {newboard}");
                 if newboard.solved() {
                     return true;
                 }
