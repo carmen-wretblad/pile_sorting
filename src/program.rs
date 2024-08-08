@@ -11,7 +11,7 @@
 
 use crate::{board::*, Move};
 use ::std::collections::hash_set;
-use std::collections::HashSet;
+use std::{collections::HashSet, usize};
 pub trait Program: Iterator {
     fn starting_state(&self) -> &Board;
     fn done(&self) -> bool;
@@ -39,6 +39,7 @@ pub struct BFS {
     found_boards: HashSet<Board>,
     next_boards: HashSet<Board>,
     current_boards: HashSet<Board>,
+    step_counter: usize,
 }
 impl BFS {
     pub fn new(board: &Board) -> Self {
@@ -48,6 +49,7 @@ impl BFS {
             next_boards: HashSet::new(),
             current_boards: HashSet::new(),
             found_boards: HashSet::new(),
+            step_counter: 0,
         };
         bfs.found_boards.insert(bfs.starting_board.clone());
         bfs.current_boards.insert(bfs.starting_board.clone());
@@ -58,6 +60,7 @@ impl BFS {
             for move_command in board.good_moves_rel() {
                 let mut newboard = board.clone();
                 newboard.perform_move(move_command);
+                println!("newboard is {newboard}");
                 if newboard.solved() {
                     return true;
                 }
@@ -67,8 +70,13 @@ impl BFS {
                 }
             }
         }
+        assert!(!self.current_boards.is_empty());
+        assert!(!self.next_boards.is_empty());
+        self.current_boards.clear();
         self.current_boards = self.next_boards.clone();
         self.next_boards.clear();
+        self.step_counter += 1;
+        println!("step is {}", self.step_counter);
         false
     }
 }
