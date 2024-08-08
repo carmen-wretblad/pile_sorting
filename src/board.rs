@@ -24,21 +24,18 @@ pub struct Board {
 /// Hashing is based on relative pile positions
 impl Hash for Board {
     fn hash<H: Hasher>(&self, state: &mut H) {
-        let mut id: Vec<u8> = Vec::new();
-        let mut pile_ids: Vec<usize> = Vec::new();
-
-        for i in 0..self.piles.len() - 1 {
-            pile_ids.push(i);
+        for pile in self.relative_piles() {
+            pile.hash(state);
         }
-        pile_ids.iter_mut().for_each(|x| *x = self.rel_to_abs(*x));
-        for i in pile_ids {
-            let mut pile = self.piles[i].clone();
-            id.append(&mut pile);
-            id.push(0);
-        }
-        id.hash(state)
     }
 }
+impl Eq for Board {}
+impl PartialEq for Board {
+    fn eq(&self, other: &Self) -> bool {
+        self.relative_piles() == other.relative_piles()
+    }
+}
+
 /// Displays the Board based on relative pile position. A board will look similar to:
 /// ```<[5][4][1 2 3]_ _>``` when printed in the terminal
 impl fmt::Display for Board {
@@ -141,6 +138,20 @@ impl Board {
         // doesn't take from one pile and put into same
         valid_moves
     }
+    fn relative_piles(&self) -> Vec<Vec<u8>> {
+        let mut piles_in_rel_order = Vec::new();
+        let mut pile_ids: Vec<usize> = Vec::new();
+
+        for i in 0..self.piles.len() - 1 {
+            pile_ids.push(i);
+        }
+        pile_ids.iter_mut().for_each(|x| *x = self.rel_to_abs(*x));
+        for i in pile_ids {
+            piles_in_rel_order.push(self.piles[i].clone());
+        }
+        piles_in_rel_order
+    }
+
     pub fn valid_moves_rel(&self) -> Vec<Move> {
         let mut moves = self.valid_moves_abs();
         moves.iter_mut().for_each(|x| *x = self.abs_to_rel_move(*x));
