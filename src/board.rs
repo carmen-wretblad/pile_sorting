@@ -136,6 +136,7 @@ impl Board {
         // doesn't take from empty pile
         // doesn't put in empty pile except first one
         // doesn't take from one pile and put into same
+        println!("valid moves abs: {:?}", &valid_moves);
         valid_moves
     }
     fn relative_piles(&self) -> Vec<Vec<u8>> {
@@ -155,12 +156,15 @@ impl Board {
     pub fn valid_moves_rel(&self) -> Vec<Move> {
         let mut moves = self.valid_moves_abs();
         moves.iter_mut().for_each(|x| *x = self.abs_to_rel_move(*x));
+        println!("valid moves rel: {:?}", &moves);
         moves
     }
 
     /// Returns all moves(relative) that may lead to a better solution.
     pub fn good_moves_rel(&self) -> Vec<Move> {
         assert!(!self.solved());
+        let innitial_valid_commands = self.valid_moves_abs();
+        let relative_valid_commands = self.valid_moves_rel();
         let mut valid_moves = self.valid_moves_abs();
         assert!(!valid_moves.is_empty());
         valid_moves.retain(|x| self.not_last_move(x)); // you never need to undo the last move.
@@ -170,9 +174,11 @@ impl Board {
         match &self.solution_pile_pos {
             Some(pile_pos) => {
                 for (i, el) in self.piles.iter().enumerate() {
-                    if usize::from(el[el.len() - 1]) == self.nbr_cards - 2 {
-                        return vec![[i, 0]]; /* if we can put the next card for the solutionpile is
-                                             // exposed, putting it on the solutionpile is the only logical move */
+                    if el.len() != 0 {
+                        if usize::from(el[el.len() - 1]) == self.nbr_cards - 2 {
+                            return vec![[i, 0]]; /* if we can put the next card for the solutionpile is
+                                                 // exposed, putting it on the solutionpile is the only logical move */
+                        }
                     }
                 }
                 valid_moves.retain(|x| x[0] != *pile_pos) //we never want to remove cards from a
@@ -184,9 +190,17 @@ impl Board {
         /* Speculated but not implemented: doesn't put bad cards on solutionpile.
         not sure if there are cases where such a reshuffle is required or not */
         assert!(!valid_moves.is_empty());
+
+        for move_command in &valid_moves {
+            assert!(innitial_valid_commands.contains(move_command));
+        }
         valid_moves
             .iter_mut()
             .for_each(|x| *x = self.abs_to_rel_move(*x));
+        for move_command in &valid_moves {
+            assert!(relative_valid_commands.contains(move_command));
+        }
+        println!("good moves {:?}", &valid_moves);
         valid_moves
     }
     fn not_last_move(&self, move_command: &Move) -> bool {
@@ -204,20 +218,23 @@ impl Board {
     pub fn perform_move(&mut self, move_command: Move) {
         // seperate into move and place logic?
 
+        println!("perform move {:?}, on board {}", move_command, self);
+        println!("translator state {:?}", self.abs_to_rel_translator);
+
         let from_rel = move_command[0];
         let to_rel = move_command[1];
         let from_abs = self.rel_to_abs(from_rel);
         let to_abs = self.rel_to_abs(to_rel);
-
         self.last_move = Some([from_abs, to_abs]);
 
-        assert!(!self.piles[from_abs].is_empty());
         assert!(
             self.valid_moves_rel().contains(&move_command),
-            "move command {:?}, wasn't contained in valid commands: {:?} (rel) || {:?} (abs)",
+            "move command {:?}, wasn't contained in valid commands: {:?} (rel) || {:?} (abs), \n 
+            current board is {}",
             move_command,
             self.valid_moves_rel(),
             self.valid_moves_abs(),
+            &self,
         );
 
         let card = self.piles[from_abs].pop().unwrap();
@@ -227,7 +244,8 @@ impl Board {
         }
 
         if usize::from(card) == self.nbr_cards && self.piles[to_abs].len() == 1 {
-            self.solution_pile_pos = Some(usize::from(card));
+            self.update_indexes(); //dirty fix for now
+            self.solution_pile_pos = Some(self.rel_to_abs(0));
         }
 
         if to_rel == 0
@@ -238,6 +256,9 @@ impl Board {
             self.piles[to_abs].remove(0);
             self.nbr_cards -= 1;
         }
+
+        println!("Board after move {}", self);
+        println!("translator state {:?}", self.abs_to_rel_translator);
     }
     /// A solved pile will be identical to a pile with the cards \[2,1\] in one pile and no other
     /// cards.

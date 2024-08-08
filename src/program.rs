@@ -41,7 +41,7 @@ pub struct BFS {
     current_boards: HashSet<Board>,
 }
 impl BFS {
-    fn new(board: &Board) -> Self {
+    pub fn new(board: &Board) -> Self {
         let mut bfs = BFS {
             name: "BFS".to_string(),
             starting_board: board.clone(),
@@ -53,7 +53,7 @@ impl BFS {
         bfs.current_boards.insert(bfs.starting_board.clone());
         bfs
     }
-    fn internal_step(&mut self) -> bool {
+    pub fn internal_step(&mut self) -> bool {
         for board in &self.current_boards {
             for move_command in board.good_moves_rel() {
                 let mut newboard = board.clone();
