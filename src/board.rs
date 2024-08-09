@@ -48,6 +48,7 @@ impl fmt::Display for Board {
             pile_ids.push(i);
         }
         pile_ids.iter_mut().for_each(|x| *x = self.rel_to_abs(*x));
+        write!(f, "({})", self.nbr_cards)?;
         write!(f, "<")?;
         for i in pile_ids {
             let mut pile = self.piles[i].clone();

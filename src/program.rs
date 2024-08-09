@@ -63,9 +63,11 @@ impl BFS {
                 newboard.perform_move(move_command);
                 //println!("newboard is {newboard}");
                 if newboard.solved() {
+                    println!("board is solved!{}", &newboard);
                     return true;
                 }
                 if !self.found_boards.contains(&newboard) {
+                    //println!("{}", &newboard);
                     self.next_boards.insert(newboard.clone());
                     self.found_boards.insert(newboard);
                 }
@@ -77,7 +79,8 @@ impl BFS {
         self.current_boards = self.next_boards.clone();
         self.next_boards.clear();
         self.step_counter += 1;
-        println!("step is {}", self.step_counter);
+        println!("step {}", self.step_counter);
+        assert!(!self.current_boards.is_empty());
         false
     }
 }
