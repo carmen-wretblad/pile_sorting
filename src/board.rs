@@ -80,8 +80,8 @@ impl Board {
     pub fn new(pile: &[u8], nbr_piles: usize) -> Board {
         assert!(pile.len() > 2);
         assert!(nbr_piles > 2);
-        assert!(!vector_util::contains_zero(pile.to_vec()));
-        assert!(vector_util::correct_sequence(pile.to_vec()));
+        assert!(!vector_util::contains_zero(&pile.to_vec()));
+        assert!(vector_util::correct_sequence(&pile.to_vec()));
         let mut new_piles = Vec::new();
         let mut new_position_translator = Vec::new();
         let mut new_nbr_cards = pile.len();
