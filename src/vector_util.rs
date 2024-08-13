@@ -23,7 +23,23 @@ pub fn correct_sequence(input_vector: &Vec<u8>) -> bool {
     input_vector.len() == all_numbers.len()
 }
 pub fn all_sequences(lenght: usize) -> Vec<Vec<u8>> {
-    unimplemented!();
+    let base_vector: Vec<u8> = (1u8..(u8::try_from(lenght + 1).unwrap())).collect();
+    recursive_sub_sequences(base_vector)
+}
+
+fn recursive_sub_sequences(vec: Vec<u8>) -> Vec<Vec<u8>> {
+    assert!(vec.len() > 0);
+    if vec.len() == 1 {
+        return vec![vec];
+    }
+    let head = vec![vec[0]];
+    let mut tail = vec.clone();
+    tail.remove(0);
+    let mut return_vector: Vec<Vec<u8>> = Vec::new();
+    for vector in recursive_sub_sequences(tail) {
+        return_vector.push([head.clone(), vector.clone()].concat());
+    }
+    return_vector
 }
 pub fn random_vec(lenght: usize) -> Vec<u8> {
     unimplemented!();
@@ -62,10 +78,20 @@ mod tests {
             vec![3, 2, 1],
         ];
         for sequence in &sequences {
-            assert!(expected_sequences.contains(&sequence));
+            assert!(
+                expected_sequences.contains(&sequence),
+                " got {:?}, expected {:?}",
+                &sequences,
+                &expected_sequences
+            );
         }
         for sequence in &expected_sequences {
-            assert!(sequences.contains(&sequence));
+            assert!(
+                sequences.contains(&sequence),
+                "got {:?}, expected {:?}",
+                &sequences,
+                &expected_sequences
+            );
         }
         assert_eq!(sequences.len(), expected_sequences.len());
     }
