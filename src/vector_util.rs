@@ -1,5 +1,8 @@
 use std::{usize, vec};
 
+use rand::seq::SliceRandom;
+use rand::thread_rng;
+
 pub fn contains_zero(input_vector: &Vec<u8>) -> bool {
     let mut vector = input_vector.clone();
     vector.retain(|x| *x == 0);
@@ -44,7 +47,12 @@ fn recursive_sub_sequences(vec: Vec<u8>) -> Vec<Vec<u8>> {
     return_vector
 }
 pub fn random_vec(lenght: usize) -> Vec<u8> {
-    unimplemented!();
+    let mut vec: Vec<u8> = (1u8..(u8::try_from(lenght + 1).unwrap())).collect();
+    assert!(vec.len() == lenght);
+    assert!(correct_sequence(&vec));
+    assert!(!contains_zero(&vec));
+    vec.shuffle(&mut thread_rng());
+    vec
 }
 #[cfg(test)]
 mod tests {
@@ -96,5 +104,13 @@ mod tests {
             );
         }
         assert_eq!(sequences.len(), expected_sequences.len());
+    }
+    #[test]
+    fn random_works() {
+        let lenght = 5;
+        let vec: Vec<u8> = random_vec(lenght);
+        assert!(vec.len() == lenght);
+        assert!(correct_sequence(&vec));
+        assert!(!contains_zero(&vec));
     }
 }
