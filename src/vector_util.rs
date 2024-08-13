@@ -32,12 +32,14 @@ fn recursive_sub_sequences(vec: Vec<u8>) -> Vec<Vec<u8>> {
     if vec.len() == 1 {
         return vec![vec];
     }
-    let head = vec![vec[0]];
-    let mut tail = vec.clone();
-    tail.remove(0);
     let mut return_vector: Vec<Vec<u8>> = Vec::new();
-    for vector in recursive_sub_sequences(tail) {
-        return_vector.push([head.clone(), vector.clone()].concat());
+    for i in 0..vec.len() {
+        let head = vec![vec[i]];
+        let mut tail = vec.clone();
+        tail.remove(i);
+        for vector in recursive_sub_sequences(tail) {
+            return_vector.push([head.clone(), vector.clone()].concat());
+        }
     }
     return_vector
 }
