@@ -1,5 +1,6 @@
 //  ##### TODO #######
 //
+//
 // Look into the possibility of using mem::swap for replacing values
 // Consider tracking higest and lowest card for each pile
 //
@@ -10,6 +11,8 @@ use core::panic;
 use std::fmt::*;
 use std::hash::*;
 use std::{u8, usize};
+
+static SOLUTION_PILE: [u8; 2] = [2, 1];
 
 #[derive(Debug, Clone)]
 /// Representation of a full set of cardpiles.
@@ -104,7 +107,7 @@ impl Board {
                 }
             }
         }
-        Board {
+        let mut board = Board {
             piles: new_piles,
             abs_to_rel_translator: new_position_translator,
             nbr_cards: new_nbr_cards,
@@ -112,7 +115,9 @@ impl Board {
             has_solution_pile: false,
             pos_of_highest_card: 0,
             last_move: None,
-        }
+        };
+        board.update_indexes();
+        board
     }
     /// Gives all moves(absolute) that may be performed that yields a valid state,
     /// performing any other move will cause a panic.
@@ -213,7 +218,7 @@ impl Board {
             return true;
         }
         let last_move = self.last_move.unwrap();
-        if (move_command[0] == last_move[1]) && (move_command[1] == last_move[0]) {
+        if move_command[0] == last_move[1] {
             return false;
         }
         true
@@ -227,7 +232,7 @@ impl Board {
         let to_rel = move_command[1];
         let from_abs = self.rel_to_abs(from_rel);
         let to_abs = self.rel_to_abs(to_rel);
-        let card = self.piles[from_abs].last().unwrap().clone();
+        let card = *self.piles[from_abs].last().unwrap();
         let moved_higest_card = usize::from(card) == self.nbr_cards;
         let moved_on_top_of_highest_card = to_abs == self.pos_of_highest_card;
         let had_solution_pile = self.has_solution_pile;
@@ -257,16 +262,15 @@ impl Board {
                 self.highest_card_is_on_bottom = false;
                 self.has_solution_pile = false;
             }
-        } else if moved_on_top_of_highest_card {
-            if had_solution_pile {
-                if should_go_on_top {
-                    if shrink {
-                        self.piles[to_abs].remove(0);
-                        self.nbr_cards -= 1;
-                    }
-                } else {
-                    self.has_solution_pile = false;
+        }
+        if moved_on_top_of_highest_card {
+            if had_solution_pile && should_go_on_top {
+                if shrink {
+                    self.piles[to_abs].remove(0);
+                    self.nbr_cards -= 1;
                 }
+            } else {
+                self.has_solution_pile = false;
             }
         }
 
@@ -277,7 +281,8 @@ impl Board {
     /// A solved pile will be identical to a pile with the cards \[2,1\] in one pile and no other
     /// cards.
     pub fn solved(&self) -> bool {
-        self.nbr_cards == 2 && self.has_solution_pile && self.piles[self.rel_to_abs(1)].is_empty()
+        let potential_solution_pile = &self.piles[self.pos_of_highest_card];
+        potential_solution_pile == &SOLUTION_PILE
     }
     fn abs_to_rel(&self, abs_val: usize) -> usize {
         self.abs_to_rel_translator[abs_val]
@@ -331,27 +336,32 @@ pub mod tests {
     #[test]
     fn new_board() {
         {
-            let input = vec![4, 3, 2, 1];
-            let expected = vec![2, 1];
+            let input = [4, 3, 2, 1];
+            let expected = SOLUTION_PILE;
 
             let board: Board = Board::new(&input, 4);
             assert_eq!(board.piles[0], expected);
+            assert!(board.solved());
         }
         {
-            let input = vec![1, 2, 3, 4];
-            let expected = vec![1, 2, 3, 4];
+            let input = [1, 2, 3, 4];
+            let expected = [1, 2, 3, 4];
 
             let board: Board = Board::new(&input, 4);
-            assert_eq!(board.piles[0], expected)
+            assert_eq!(board.piles[0], expected);
+            assert!(!board.solved());
         }
         {
-            let input = vec![8, 7, 6, 5, 1, 2, 3, 4];
-            let expected = vec![6, 5, 1, 2, 3, 4];
+            let input = [8, 7, 6, 5, 1, 2, 3, 4];
+            let expected = [6, 5, 1, 2, 3, 4];
 
             let board = Board::new(&input, 7);
-            assert_eq!(board.piles[0], expected)
+            assert_eq!(board.piles[0], expected);
+            assert!(!board.solved())
         }
     }
+    #[test]
+    fn invalid_board_creation() {}
 
     fn get_hash<T>(obj: &T) -> u64
     where

@@ -67,7 +67,8 @@ impl BFS {
                     return true;
                 }
                 if !self.found_boards.contains(&newboard) {
-                    //println!("{}", &newboard);
+                    println!("{}", &newboard);
+                    //
                     self.next_boards.insert(newboard.clone());
                     self.found_boards.insert(newboard);
                 }
