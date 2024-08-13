@@ -15,6 +15,6 @@ mod tests {
         assert_eq!(result, 4);
     }
 }
-
 pub mod board;
 pub mod program;
+pub mod vector_util;

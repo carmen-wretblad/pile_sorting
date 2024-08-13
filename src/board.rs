@@ -5,6 +5,7 @@
 // Consider tracking higest and lowest card for each pile
 //
 // ######
+use crate::vector_util;
 use crate::Move;
 use core::fmt;
 use core::panic;
@@ -79,7 +80,8 @@ impl Board {
     pub fn new(pile: &[u8], nbr_piles: usize) -> Board {
         assert!(pile.len() > 2);
         assert!(nbr_piles > 2);
-
+        assert!(!vector_util::contains_zero(pile.to_vec()));
+        assert!(vector_util::correct_sequence(pile.to_vec()));
         let mut new_piles = Vec::new();
         let mut new_position_translator = Vec::new();
         let mut new_nbr_cards = pile.len();
@@ -346,7 +348,6 @@ pub mod tests {
         {
             let input = [1, 2, 3, 4];
             let expected = [1, 2, 3, 4];
-
             let board: Board = Board::new(&input, 4);
             assert_eq!(board.piles[0], expected);
             assert!(!board.solved());
@@ -361,7 +362,26 @@ pub mod tests {
         }
     }
     #[test]
-    fn invalid_board_creation() {}
+    #[should_panic]
+    fn too_short() {
+        Board::new(&[2, 1], 4);
+    }
+    #[test]
+    #[should_panic]
+    fn contains_zero() {
+        Board::new(&[3, 4, 0, 2, 1], 4);
+    }
+
+    #[test]
+    #[should_panic]
+    fn contains_gap() {
+        Board::new(&[1, 2, 3, 5], 4);
+    }
+    #[test]
+    #[should_panic]
+    fn starts_at_wrong_index() {
+        Board::new(&[2, 3, 4, 6, 5], 4);
+    }
 
     fn get_hash<T>(obj: &T) -> u64
     where
@@ -374,6 +394,7 @@ pub mod tests {
 
     #[test]
     fn hash_test() {
+        //TODO: use a hashmap to double check this
         let mut board1 = Board::new(&vec![1, 2, 3, 4], 4);
         let mut board2 = Board::new(&vec![1, 2, 4, 3], 4);
 
