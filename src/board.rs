@@ -337,7 +337,10 @@ impl Board {
 #[cfg(test)]
 pub mod tests {
     use super::*;
-    use std::vec;
+    use std::{
+        collections::{hash_set, HashSet},
+        vec,
+    };
 
     #[test]
     fn new_board() {
@@ -409,6 +412,7 @@ pub mod tests {
     #[test]
     fn hash_test() {
         //TODO: use a hashmap to double check this
+
         let mut board1 = Board::new(&vec![1, 2, 3, 4], 4);
         let mut board2 = Board::new(&vec![1, 2, 4, 3], 4);
 
@@ -424,6 +428,35 @@ pub mod tests {
 
         assert_eq!(get_hash(&board1), get_hash(&board2));
     }
+    #[test]
+    fn hash_set_test() {
+        let mut hash_set: HashSet<Board> = HashSet::new();
+
+        let mut board1 = Board::new(&vec![1, 2, 3, 4], 4);
+        let mut board2 = Board::new(&vec![1, 2, 4, 3], 4);
+        insert_new_key_to_hash_set(&mut hash_set, &board1);
+        insert_new_key_to_hash_set(&mut hash_set, &board2);
+
+        board1.perform_move([0, 1]); //[4][1,2,3]
+        board2.perform_move([0, 1]); //[3][1,2,4]
+        insert_new_key_to_hash_set(&mut hash_set, &board1);
+        insert_new_key_to_hash_set(&mut hash_set, &board2);
+
+        board1.perform_move([1, 2]); //[4][3][1,2]
+        board2.perform_move([1, 2]); //[4][3][1,2]
+        insert_new_key_to_hash_set(&mut hash_set, &board1);
+        assert!(hash_set.contains(&board2));
+    }
+    fn insert_new_key_to_hash_set<K>(set: &mut HashSet<K>, key: &K)
+    where
+        K: std::cmp::Eq + Clone,
+        K: std::hash::Hash,
+    {
+        assert!(!set.contains(&key));
+        set.insert(key.clone());
+        assert!(set.contains(&key));
+    }
+
     #[test]
     fn display_test() {
         let mut board1 = Board::new(&vec![1, 2, 3, 4], 4);
