@@ -16,5 +16,6 @@ mod tests {
     }
 }
 pub mod board;
+pub mod config;
 pub mod program;
 pub mod vector_util;

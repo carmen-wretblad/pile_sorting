@@ -5,6 +5,7 @@
 // Consider tracking higest and lowest card for each pile
 //
 // ######
+use crate::config::*;
 use crate::vector_util;
 use crate::Move;
 use core::fmt;
@@ -13,7 +14,7 @@ use std::fmt::*;
 use std::hash::*;
 use std::{u8, usize};
 
-static SOLUTION_PILE: [u8; 2] = [2, 1];
+const SOLUTION_PILE: [u8; 2] = [2, 1];
 
 #[derive(Debug, Clone)]
 /// Representation of a full set of cardpiles.
@@ -78,8 +79,11 @@ impl fmt::Display for Board {
 impl Board {
     /// Creates a new Board, with all cards placed in the 0th pile.
     pub fn new(pile: &[u8], nbr_piles: usize) -> Board {
-        assert!(pile.len() > 2);
-        assert!(nbr_piles > 2);
+        assert!(pile.len() < MAX_NBR_OF_CARDS + 1);
+        assert!(MIN_NBR_OF_CARDS < pile.len() + 1);
+        assert!(nbr_piles < MAX_NBR_OF_PILES + 1);
+        assert!(MIN_NBR_OF_CARDS < nbr_piles + 1);
+
         assert!(!vector_util::contains_zero(&pile.to_vec()));
         assert!(vector_util::correct_sequence(&pile.to_vec()));
         let mut new_piles = Vec::new();
@@ -381,6 +385,16 @@ pub mod tests {
     #[should_panic]
     fn starts_at_wrong_index() {
         Board::new(&[2, 3, 4, 6, 5], 4);
+    }
+    #[test]
+    #[should_panic]
+    fn too_few_piles() {
+        Board::new(&[4, 5, 3, 2, 1], MIN_NBR_OF_PILES - 1);
+    }
+    #[test]
+    #[should_panic]
+    fn too_many_piles() {
+        Board::new(&[4, 5, 3, 2, 1], MAX_NBR_OF_PILES + 1);
     }
 
     fn get_hash<T>(obj: &T) -> u64
