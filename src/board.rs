@@ -14,20 +14,21 @@ use std::fmt::*;
 use std::hash::*;
 use std::{u8, usize};
 
-const SOLUTION_PILE: [u8; 2] = [2, 1];
+pub const SOLUTION_PILE: [u8; 2] = [2, 1];
 
 #[derive(Debug, Clone)]
 /// Representation of a full set of cardpiles.
 /// Piles are always sorted in order of the value of the bottom card, highest to lowest.
 pub struct Board {
     pub piles: Vec<Vec<u8>>,
-    abs_to_rel_translator: Vec<usize>,
+    pub abs_to_rel_translator: Vec<usize>,
     pub nbr_cards: usize,
     highest_card_is_on_bottom: bool,
     has_solution_pile: bool,
     pos_of_highest_card: usize,
-    last_move: Option<Move>,
+    pub last_move: Option<Move>,
 }
+
 /// Hashing is based on relative pile positions
 impl Hash for Board {
     fn hash<H: Hasher>(&self, state: &mut H) {
@@ -332,6 +333,19 @@ impl Board {
             counter += 1;
         }
         // order rel based on highest card
+    }
+    pub fn revert(&self) -> Option<Board> {
+        match self.last_move {
+            None => return None,
+            Some(some_move) => {
+                let mut the_move = some_move.clone();
+                the_move.reverse();
+                the_move = self.rel_to_abs_move(the_move);
+                let mut board = self.clone();
+                board.perform_move(the_move);
+                Some(board)
+            }
+        }
     }
 }
 #[cfg(test)]
