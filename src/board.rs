@@ -251,7 +251,7 @@ impl Board {
 
         assert!(
             self.valid_moves_rel().contains(&move_command),
-            "move command {:?}, wasn't contained in valid commands: {:?} (rel) || {:?} (abs), \n 
+            "move command {:?}, wasn't contained in the valid commands: {:?} (rel) || {:?} (abs), \n 
             current board is {}",
             move_command,
             self.valid_moves_rel(),
