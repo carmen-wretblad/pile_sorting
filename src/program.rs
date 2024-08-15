@@ -8,7 +8,8 @@
 // smallest amount of signals to get it to move from one state to another
 // ### TODO ###
 // Implement "Solution"
-
+use crate::validator::Solution;
+use crate::validator::{self, confirm_solution};
 use crate::{board::*, Move};
 use ::std::collections::hash_set;
 use std::{collections::HashSet, usize};
@@ -56,14 +57,16 @@ impl BFS {
         bfs
     }
     pub fn internal_step(&mut self) -> bool {
-        println!("{}", &self.current_boards.len());
+        //println!("{}", &self.current_boards.len());
         for board in &self.current_boards {
             for move_command in board.good_moves_rel() {
                 let mut newboard = board.clone();
                 newboard.perform_move(move_command);
                 //println!("newboard is {newboard}");
                 if newboard.solved() {
-                    println!("board is solved!{}", &newboard);
+                    self.found_boards.insert(newboard.clone());
+                    println!("{}", &newboard);
+                    self.current_boards.clear();
                     return true;
                 }
                 if !self.found_boards.contains(&newboard) {
@@ -83,5 +86,13 @@ impl BFS {
         println!("step {}", self.step_counter);
         assert!(!self.current_boards.is_empty());
         false
+    }
+    pub fn get_full_solution(&self) -> Option<Solution> {
+        let solution = validator::get_solution(&self.found_boards, &self.starting_board);
+        if confirm_solution(&solution, &self.starting_board) {
+            Some(solution)
+        } else {
+            None
+        }
     }
 }

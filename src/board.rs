@@ -27,6 +27,8 @@ pub struct Board {
     has_solution_pile: bool,
     pos_of_highest_card: usize,
     pub last_move: Option<Move>,
+    pub last_location_translator: Option<Vec<usize>>,
+    last_shrunk: bool,
 }
 
 /// Hashing is based on relative pile positions
@@ -122,8 +124,14 @@ impl Board {
             has_solution_pile: false,
             pos_of_highest_card: 0,
             last_move: None,
+            last_location_translator: None,
+            last_shrunk: false,
         };
         board.update_indexes();
+        board
+    }
+    pub fn new_solved_board(nbr_piles: usize) -> Board {
+        let board = Board::new(&[3, 2, 1], nbr_piles);
         board
     }
     /// Gives all moves(absolute) that may be performed that yields a valid state,
@@ -230,9 +238,20 @@ impl Board {
         }
         true
     }
-
-    /// Performs a move. Move instructions are "relative".
     pub fn perform_move(&mut self, move_command: Move) {
+        assert!(
+            self.valid_moves_rel().contains(&move_command),
+            "move command {:?}, wasn't contained in the valid commands: {:?} (rel) || {:?} (abs), \n 
+            current board is {}",
+            move_command,
+            self.valid_moves_rel(),
+            self.valid_moves_abs(),
+            &self,
+        );
+        self.perform_move_unchecked(move_command)
+    }
+    /// Performs a move. Move instructions are "relative".
+    fn perform_move_unchecked(&mut self, move_command: Move) {
         // seperate into move and place logic?
 
         let from_rel = move_command[0];
@@ -249,16 +268,7 @@ impl Board {
         let shrink = (card_diff == 2) && should_go_on_top;
 
         self.last_move = Some([from_abs, to_abs]);
-
-        assert!(
-            self.valid_moves_rel().contains(&move_command),
-            "move command {:?}, wasn't contained in the valid commands: {:?} (rel) || {:?} (abs), \n 
-            current board is {}",
-            move_command,
-            self.valid_moves_rel(),
-            self.valid_moves_abs(),
-            &self,
-        );
+        self.last_location_translator = Some(self.abs_to_rel_translator.clone());
 
         if moved_higest_card {
             self.pos_of_highest_card = to_abs;
@@ -280,7 +290,7 @@ impl Board {
                 self.has_solution_pile = false;
             }
         }
-
+        self.last_shrunk = shrink;
         self.piles[from_abs].pop().unwrap();
         self.piles[to_abs].push(card);
         self.update_indexes();
@@ -289,12 +299,17 @@ impl Board {
     /// cards.
     pub fn solved(&self) -> bool {
         let potential_solution_pile = &self.piles[self.pos_of_highest_card];
-        potential_solution_pile == &SOLUTION_PILE
+        let solved = potential_solution_pile == &SOLUTION_PILE;
+        //if solved {
+        //println!("solved board is {}", &self);
+        //println!("with debug {:?}", &self);
+        //}
+        solved
     }
     fn abs_to_rel(&self, abs_val: usize) -> usize {
         self.abs_to_rel_translator[abs_val]
     }
-    fn abs_to_rel_move(&self, abs_move: Move) -> Move {
+    pub fn abs_to_rel_move(&self, abs_move: Move) -> Move {
         [self.abs_to_rel(abs_move[0]), self.abs_to_rel(abs_move[1])]
     }
 
@@ -306,7 +321,7 @@ impl Board {
         }
         panic!();
     }
-    fn rel_to_abs_move(&self, rel_move: Move) -> Move {
+    pub fn rel_to_abs_move(&self, rel_move: Move) -> Move {
         [self.rel_to_abs(rel_move[0]), self.rel_to_abs(rel_move[1])]
     }
 
@@ -336,13 +351,20 @@ impl Board {
     }
     pub fn revert(&self) -> Option<Board> {
         match self.last_move {
-            None => return None,
+            None => None,
             Some(some_move) => {
                 let mut the_move = some_move.clone();
                 the_move.reverse();
-                the_move = self.rel_to_abs_move(the_move);
+                //let translator = self.last_location_translator.clone().unwrap();
+                //the_move[0] = translator[the_move[0]];
+                //the_move[1] = translator[the_move[1]];
                 let mut board = self.clone();
-                board.perform_move(the_move);
+                if board.last_shrunk {
+                    board.piles[self.pos_of_highest_card]
+                        .insert(0, u8::try_from(self.nbr_cards + 1).unwrap());
+                }
+                board.perform_move_unchecked(self.abs_to_rel_move(the_move));
+                board.last_move = None;
                 Some(board)
             }
         }
@@ -351,10 +373,7 @@ impl Board {
 #[cfg(test)]
 pub mod tests {
     use super::*;
-    use std::{
-        collections::{hash_set, HashSet},
-        vec,
-    };
+    use std::{collections::HashSet, vec};
 
     #[test]
     fn new_board() {

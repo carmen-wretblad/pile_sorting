@@ -10,7 +10,7 @@ mod test {
     const fn config_check() {
         assert!(
             MIN_NBR_OF_CARDS > 2,
-            "Internal logic of Board requires 2 cards to determine if a board is solved. But I'm leaving room to assume there are always 3 cards "
+            "Internal logic of Board requires 2 cards to determine if a board is solved. New creation requires 3 however "
         );
         assert!(
             MIN_NBR_OF_PILES > 2,

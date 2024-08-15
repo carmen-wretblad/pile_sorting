@@ -1,30 +1,53 @@
 use crate::board::*;
 use crate::Move;
+use core::panic;
 use std::collections::hash_map::*;
 use std::collections::hash_set::*;
-type Solution = Vec<Move>;
+pub type Solution = Vec<Move>;
 
-fn get_solution(set: &HashSet<Board>, nbr_piles: usize) -> Solution {
-    let mut sequence_inverted: Vec<Board> = Vec::new();
-    let solution_board = Board::new(&SOLUTION_PILE, nbr_piles);
+pub fn get_solution(set: &HashSet<Board>, starting_board: &Board) -> Solution {
+    let nbr_piles = starting_board.piles.len();
+    let mut board_sequence_inverted: Vec<Board> = Vec::new();
+    let solution_board = Board::new_solved_board(nbr_piles);
     let mut board_option: Option<Board> = set.get(&solution_board).cloned();
-    loop {
+    'outer: loop {
         match board_option {
             Some(board) => {
-                sequence_inverted.push(board.clone());
-                board_option = board.revert();
+                board_sequence_inverted.push(board.clone());
+                let a = board.revert();
+                if Option::is_some(&a) {
+                    board_option = set.get(&a.unwrap()).cloned();
+                } else {
+                    break 'outer;
+                }
             }
             None => {
-                break;
+                break 'outer;
             }
         }
     }
-    sequence_inverted.reverse();
-    board_seq_to_move(&sequence_inverted)
+    board_sequence_inverted.reverse();
+    board_seq_to_move(&board_sequence_inverted)
 }
 
-fn board_seq_to_move(vec: &Vec<Board>) -> Solution {
-    unimplemented!();
+pub fn board_seq_to_move(vec: &Vec<Board>) -> Solution {
+    let mut vec = vec.to_owned();
+    vec.remove(0);
+    let move_iter = vec
+        .into_iter()
+        .map(|x| x.last_move.clone().unwrap())
+        .collect();
+    move_iter
+}
+pub fn confirm_solution(solution: &Solution, starting_board: &Board) -> bool {
+    let mut board = starting_board.clone();
+    println!("starting board: {}", &board);
+    for abs_move_command in solution {
+        let rel_move = board.abs_to_rel_move(*abs_move_command);
+        board.perform_move(rel_move);
+        println!("{}", &board);
+    }
+    board.solved()
 }
 
 fn get_all_solutions(map: &HashMap<Board, Vec<Move>>) -> Vec<Solution> {
