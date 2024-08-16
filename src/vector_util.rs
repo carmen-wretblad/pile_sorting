@@ -1,37 +1,20 @@
+use std::collections::HashSet;
+use std::usize;
+
 use rand::seq::SliceRandom;
 use rand::thread_rng;
 
-/// Checks if a slice contains the integer 0, which can't be used to make a board
-pub fn contains_zero(input_vector: &Vec<u8>) -> bool {
-    let mut vector = input_vector.clone();
-    vector.retain(|x| *x == 0);
-    !vector.is_empty()
-}
 /// Checks that a given sequence doesn't contain gaps.
 pub fn correct_sequence(input_vector: &[u8]) -> bool {
-    let mut all_numbers: Vec<u8> = Vec::new();
-    for number in 1..input_vector.len() + 1 {
-        all_numbers.push(u8::try_from(number).unwrap());
-    }
-
-    /* for number in all_numbers.iter() {
-        if !input_vector.contains(number) {
-            return false;
-        }
-    } */
+    let all_numbers: HashSet<u8> = (1..input_vector.len() + 1)
+        .map(|number| u8::try_from(number).unwrap())
+        .collect();
     all_numbers
         .iter()
         .all(|number| input_vector.contains(number))
         && input_vector
             .iter()
             .all(|number| all_numbers.contains(number))
-        && input_vector.len() == all_numbers.len()
-    /*for number in input_vector.iter() {
-        if !all_numbers.contains(number) {
-            return false;
-        }
-    }
-    input_vector.len() == all_numbers.len() */
 }
 /// Gives all possible orderings of that makes a valid starting pile with a given lenght.
 pub fn all_sequences(lenght: usize) -> Vec<Vec<u8>> {
@@ -60,21 +43,13 @@ pub fn random_vec(lenght: usize) -> Vec<u8> {
     let mut vec: Vec<u8> = (1u8..(u8::try_from(lenght + 1).unwrap())).collect();
     assert!(vec.len() == lenght);
     assert!(correct_sequence(&vec));
-    assert!(!contains_zero(&vec));
+    assert!(!vec.contains(&0u8));
     vec.shuffle(&mut thread_rng());
     vec
 }
 #[cfg(test)]
 mod tests {
     use super::*;
-    #[test]
-    fn contains_zero_true() {
-        assert!(contains_zero(&vec![1, 3, 4, 0]));
-    }
-    #[test]
-    fn contains_zero_false() {
-        assert!(!contains_zero(&vec![1, 2, 3]));
-    }
     #[test]
     fn correct_sequence_true() {
         assert!(correct_sequence(&vec![1, 2, 3, 4, 5]))
@@ -119,6 +94,6 @@ mod tests {
         let vec: Vec<u8> = random_vec(lenght);
         assert!(vec.len() == lenght);
         assert!(correct_sequence(&vec));
-        assert!(!contains_zero(&vec));
+        assert!(!vec.contains(&0u8));
     }
 }

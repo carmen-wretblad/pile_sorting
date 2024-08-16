@@ -42,7 +42,7 @@ pub fn confirm_solution(solution: &Solution, starting_board: &Board) -> bool {
         let rel_move = board.abs_to_rel_move(*abs_move_command);
         board.perform_move(rel_move);
 
-        board.abs_to_rel_translator = starting_board.abs_to_rel_translator.clone();
+        //board.abs_to_rel_translator = starting_board.abs_to_rel_translator.clone();
         println!("{}", &board);
     }
     board.solved()

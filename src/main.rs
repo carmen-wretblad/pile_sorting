@@ -3,7 +3,7 @@ use ::sorting::program::BFS;
 
 //40 000 boards fine, 200 000 slowdown
 fn main() {
-    let vec = vec![2, 8, 5, 9, 3, 4, 6, 1, 7];
+    let vec = vec![2, 5, 3, 4, 6, 1, 7];
     let board1 = Board::new(&vec, 4);
     let mut bfs1 = BFS::new(&board1);
     while !bfs1.internal_step() {}
