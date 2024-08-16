@@ -347,7 +347,7 @@ impl Board {
 #[cfg(test)]
 pub mod tests {
     use super::*;
-    use std::collections::HashSet;
+    use std::collections::{hash_set, HashSet};
 
     #[test]
     fn new_board() {
@@ -489,5 +489,23 @@ pub mod tests {
         assert_eq!(board1.valid_moves_rel(), expected);
         assert_eq!(board2.valid_moves_abs(), expected);
         assert_eq!(board2.valid_moves_rel(), expected);
+    }
+    #[test]
+    fn hashing_double_take() {
+        let mut all_board: Vec<Board> = Vec::new();
+        for pile in vector_util::all_sequences(5) {
+            all_board.push(Board::new(&pile, 4));
+        }
+        let mut set: HashSet<Board> = HashSet::new();
+        for board in &all_board {
+            assert!(!set.contains(&board));
+            set.insert(board.clone());
+            assert!(set.contains(&board));
+            assert_eq!(set.get(&board).unwrap(), board);
+        }
+        for board in all_board {
+            assert!(set.contains(&board));
+            assert_eq!(set.get(&board).unwrap(), &board);
+        }
     }
 }
