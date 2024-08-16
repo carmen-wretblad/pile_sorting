@@ -1,4 +1,5 @@
 #![allow(unused)]
+const SHOULD_PRINT: bool = false;
 // ### Questions ###
 // Is there a trait for structs that can be created with New?
 // Answered: What happens when a struct is moved: Depends
@@ -77,17 +78,22 @@ impl BFS {
         for board in &self.current_boards {
             for move_command in self.get_selected_moveset(board) {
                 let mut newboard = board.clone();
-                newboard.perform_move(move_command);
-                //println!("newboard is {newboard}");
+                newboard.perform_move(
+                    move_command,
+                    &format!("bfs with srategy {:?}", self.strategy),
+                );
                 if newboard.solved() {
                     self.found_boards.insert(newboard.clone());
-                    println!("{}", &newboard);
+                    if SHOULD_PRINT {
+                        println!("{}", &newboard);
+                    }
                     self.current_boards.clear();
                     return true;
                 }
                 if !self.found_boards.contains(&newboard) {
-                    println!("{}", &newboard);
-                    //
+                    if SHOULD_PRINT {
+                        println!("{}", &newboard)
+                    };
                     self.next_boards.insert(newboard.clone());
                     self.found_boards.insert(newboard);
                 }
@@ -99,7 +105,9 @@ impl BFS {
         self.current_boards = self.next_boards.clone();
         self.next_boards.clear();
         self.step_counter += 1;
-        println!("step {}", self.step_counter);
+        if SHOULD_PRINT {
+            println!("step {}", self.step_counter);
+        }
         assert!(!self.current_boards.is_empty());
         false
     }
@@ -110,5 +118,53 @@ impl BFS {
         } else {
             None
         }
+    }
+    pub fn solve(&mut self) -> Option<Solution> {
+        while !self.internal_step() {}
+        self.get_full_solution()
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use crate::vector_util;
+
+    use super::*;
+    #[test]
+    fn compare_all() {
+        let mut all_board: Vec<Board> = Vec::new();
+        for pile in vector_util::all_sequences(5) {
+            all_board.push(Board::new(&pile, 4));
+        }
+        all_board.push(Board::new(&vec![2, 5, 3, 4, 6, 1, 7], 4));
+        for board in all_board {
+            best_solution_not_exluded(&board);
+        }
+    }
+
+    fn best_solution_not_exluded(board: &Board) {
+        let mut bfs_good = BFS::new(&board, MoveChoice::Good);
+        let mut bfs_valid = BFS::new(&board, MoveChoice::Valid);
+        let mut bfs_unconfirmed = BFS::new(&board, MoveChoice::Unconfirmed);
+        let valid_len = bfs_valid
+            .solve()
+            .expect("There is always a valid solution")
+            .len();
+        let good_len = bfs_good
+            .solve()
+            .expect("There should always be a good solution")
+            .len();
+        let unconfirmed_len = bfs_unconfirmed
+            .solve()
+            .expect("Unconfirmed method failed")
+            .len();
+
+        assert!(
+            valid_len == good_len && good_len == unconfirmed_len,
+            "valid: {}, good: {}, unconfirmed: {}",
+            valid_len,
+            good_len,
+            unconfirmed_len
+        );
     }
 }

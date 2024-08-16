@@ -143,6 +143,7 @@ impl Board {
                 valid_moves.push([*from, *to])
             }
         }
+        valid_moves.retain(|x| x[0] != x[1]);
 
         // doesn't take from empty pile
         // doesn't put in empty pile except first one
@@ -222,27 +223,31 @@ impl Board {
             None => true,
         }
     }
-    pub fn perform_move(&mut self, move_command: Move) {
+    pub fn perform_move(&mut self, move_command: Move, caller_name: &str) {
         assert!(
             self.valid_moves_rel().contains(&move_command),
             "move command {:?}, wasn't contained in the valid commands: {:?} (rel) || {:?} (abs), \n 
-            current board is {}",
+            current board is {}, \n {:?} \n called is {}",
             move_command,
             self.valid_moves_rel(),
             self.valid_moves_abs(),
             &self,
+            &self,
+            caller_name
         );
         self.perform_move_unchecked(move_command)
     }
     /// Performs a move. Move instructions are "relative".
-    fn perform_move_unchecked(&mut self, move_command: Move) {
+    pub fn perform_move_unchecked(&mut self, move_command: Move) {
         // seperate into move and place logic?
 
         let from_rel = move_command[0];
         let to_rel = move_command[1];
         let from_abs = self.rel_to_abs(from_rel);
         let to_abs = self.rel_to_abs(to_rel);
-        let card = *self.piles[from_abs].last().unwrap();
+        let card = *self.piles[from_abs]
+            .last()
+            .expect("Should never issue command to take from empty pile");
         let moved_higest_card = usize::from(card) == self.nbr_cards;
         let moved_on_top_of_highest_card = to_abs == self.pos_of_highest_card;
         let had_solution_pile = self.has_solution_pile;
@@ -416,13 +421,13 @@ pub mod tests {
 
         assert_ne!(get_hash(&board1), get_hash(&board2));
 
-        board1.perform_move([0, 1]); //[4][1,2,3]
-        board2.perform_move([0, 1]); //[3][1,2,4]
+        board1.perform_move([0, 1], ""); //[4][1,2,3]
+        board2.perform_move([0, 1], ""); //[3][1,2,4]
 
         assert_ne!(get_hash(&board1), get_hash(&board2));
 
-        board1.perform_move([1, 2]); //[4][3][1,2]
-        board2.perform_move([1, 2]); //[4][3][1,2]
+        board1.perform_move([1, 2], ""); //[4][3][1,2]
+        board2.perform_move([1, 2], ""); //[4][3][1,2]
 
         assert_eq!(get_hash(&board1), get_hash(&board2));
     }
@@ -435,13 +440,13 @@ pub mod tests {
         insert_new_key_to_hash_set(&mut hash_set, &board1);
         insert_new_key_to_hash_set(&mut hash_set, &board2);
 
-        board1.perform_move([0, 1]); //[4][1,2,3]
-        board2.perform_move([0, 1]); //[3][1,2,4]
+        board1.perform_move([0, 1], ""); //[4][1,2,3]
+        board2.perform_move([0, 1], ""); //[3][1,2,4]
         insert_new_key_to_hash_set(&mut hash_set, &board1);
         insert_new_key_to_hash_set(&mut hash_set, &board2);
 
-        board1.perform_move([1, 2]); //[4][3][1,2]
-        board2.perform_move([1, 2]); //[4][3][1,2]
+        board1.perform_move([1, 2], ""); //[4][3][1,2]
+        board2.perform_move([1, 2], ""); //[4][3][1,2]
         insert_new_key_to_hash_set(&mut hash_set, &board1);
         assert!(hash_set.contains(&board2));
     }
@@ -463,16 +468,26 @@ pub mod tests {
         assert_ne!(format!("{}", board1), format!("{}", board2));
         println!("{board1} != {board2} ");
 
-        board1.perform_move([0, 1]); //[4][1,2,3]
-        board2.perform_move([0, 1]); //[3][1,2,4]
+        board1.perform_move([0, 1], ""); //[4][1,2,3]
+        board2.perform_move([0, 1], ""); //[3][1,2,4]
 
         assert_ne!(format!("{}", board1), format!("{}", board2));
         println!("{board1} != {board2} ");
 
-        board1.perform_move([1, 2]); //[4][3][1,2]
-        board2.perform_move([1, 2]); //[4][3][1,2]
+        board1.perform_move([1, 2], ""); //[4][3][1,2]
+        board2.perform_move([1, 2], ""); //[4][3][1,2]
 
         assert_eq!(format!("{}", board1), format!("{}", board2));
         println!("{board1} == {board2} ");
+    }
+    #[test]
+    fn valid_solutions_test() {
+        let board1 = Board::new(&[1, 2, 3, 4, 5], 4);
+        let board2 = Board::new(&[1, 5, 2, 3, 4], 4);
+        let expected = vec![[0, 1]];
+        assert_eq!(board1.valid_moves_abs(), expected);
+        assert_eq!(board1.valid_moves_rel(), expected);
+        assert_eq!(board2.valid_moves_abs(), expected);
+        assert_eq!(board2.valid_moves_rel(), expected);
     }
 }

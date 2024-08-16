@@ -3,7 +3,7 @@ use crate::Move;
 use std::collections::hash_map::*;
 use std::collections::hash_set::*;
 pub type Solution = Vec<Move>;
-
+const VALIDATOR_SHOULD_PRINT: bool = false;
 pub fn get_solution(set: &HashSet<Board>, starting_board: &Board) -> Solution {
     let nbr_piles = starting_board.piles.len();
     let mut board_sequence_inverted: Vec<Board> = Vec::new();
@@ -36,13 +36,19 @@ pub fn board_seq_to_move(vec: &Vec<Board>) -> Solution {
 }
 pub fn confirm_solution(solution: &Solution, starting_board: &Board) -> bool {
     let mut board = starting_board.clone();
-    println!("starting board: {}", &board);
+    if VALIDATOR_SHOULD_PRINT {
+        println!("starting board validation for: {}", &board);
+    }
     for abs_move_command in solution {
+        todo!();
         let rel_move = board.abs_to_rel_move(*abs_move_command);
-        board.perform_move(rel_move);
+        board.perform_move(rel_move, "confirming_solution");
+        //board.perform_move_unchecked(rel_move);
 
         //board.abs_to_rel_translator = starting_board.abs_to_rel_translator.clone();
-        println!("{}", &board);
+        if VALIDATOR_SHOULD_PRINT {
+            println!("{}", &board);
+        }
     }
     board.solved()
 }
