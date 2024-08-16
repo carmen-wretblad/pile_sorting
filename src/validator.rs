@@ -32,7 +32,6 @@ pub fn get_solution(set: &HashSet<Board>, starting_board: &Board) -> Solution {
 pub fn board_seq_to_move(vec: &Vec<Board>) -> Solution {
     let mut vec = vec.to_owned();
     vec.remove(0);
-
     vec.into_iter().map(|x| x.last_move.unwrap()).collect()
 }
 pub fn confirm_solution(solution: &Solution, starting_board: &Board) -> bool {

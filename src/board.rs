@@ -211,6 +211,11 @@ impl Board {
 
         valid_moves
     }
+    pub fn unconfirmed_validity_moves_rel(&self) -> Vec<Move> {
+        let moves = self.good_moves_rel();
+        // perform theorised restrictions
+        moves
+    }
     fn not_last_move(&self, move_command: &Move) -> bool {
         match self.last_move {
             Some(last_move) => last_move != *move_command,

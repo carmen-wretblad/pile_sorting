@@ -8,8 +8,8 @@
 // smallest amount of signals to get it to move from one state to another
 // ### TODO ###
 // Implement "Solution"
-use crate::validator;
 use crate::validator::*;
+use crate::{board, validator};
 use crate::{board::*, Move};
 use std::collections::HashSet;
 pub trait Program: Iterator {
@@ -33,7 +33,16 @@ pub trait Program: Iterator {
     fn progress(&self) -> &Vec<Move>;
 }
 /// stuff all programs should contain
+
+#[derive(Debug)]
+pub enum MoveChoice {
+    Valid,
+    Good,
+    Unconfirmed,
+}
+
 pub struct BFS {
+    strategy: MoveChoice,
     name: String,
     starting_board: Board,
     found_boards: HashSet<Board>,
@@ -42,8 +51,9 @@ pub struct BFS {
     step_counter: usize,
 }
 impl BFS {
-    pub fn new(board: &Board) -> Self {
+    pub fn new(board: &Board, strategy: MoveChoice) -> Self {
         let mut bfs = BFS {
+            strategy,
             name: "BFS".to_string(),
             starting_board: board.clone(),
             next_boards: HashSet::new(),
@@ -55,10 +65,17 @@ impl BFS {
         bfs.current_boards.insert(bfs.starting_board.clone());
         bfs
     }
+    fn get_selected_moveset(&self, board: &Board) -> Vec<Move> {
+        match &self.strategy {
+            MoveChoice::Valid => board.valid_moves_rel(),
+            MoveChoice::Good => board.good_moves_rel(),
+            MoveChoice::Unconfirmed => board.unconfirmed_validity_moves_rel(),
+        }
+    }
     pub fn internal_step(&mut self) -> bool {
         //println!("{}", &self.current_boards.len());
         for board in &self.current_boards {
-            for move_command in board.good_moves_rel() {
+            for move_command in self.get_selected_moveset(board) {
                 let mut newboard = board.clone();
                 newboard.perform_move(move_command);
                 //println!("newboard is {newboard}");
