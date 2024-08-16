@@ -119,6 +119,11 @@ impl BFS {
             None
         }
     }
+    pub fn solution_lenght(&mut self) -> usize {
+        while !self.internal_step() {}
+        let solution = validator::get_solution(&self.found_boards, &self.starting_board);
+        solution.len()
+    }
     pub fn solve(&mut self) -> Option<Solution> {
         while !self.internal_step() {}
         self.get_full_solution()

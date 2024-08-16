@@ -34,7 +34,6 @@ pub fn board_seq_to_move(vec: &Vec<Board>) -> Solution {
     vec.remove(0);
     vec.into_iter().map(|x| x.last_move.unwrap()).collect()
 }
-pub struct validatorBoard {}
 
 pub fn confirm_solution(solution: &Solution, starting_board: &Board) -> bool {
     let mut board = starting_board.clone();
