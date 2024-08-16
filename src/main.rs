@@ -4,7 +4,7 @@ use ::sorting::program::BFS;
 //40 000 boards fine, 200 000 slowdown
 fn main() {
     let vec1 = vec![2, 5, 3, 4, 6, 1, 7];
-    let vec2 = vec![1, 2, 3, 4, 5];
+    let vec2 = vec![1, 5, 2, 4, 3];
     let board2 = Board::new(&vec2, 4);
     let board1 = Board::new(&vec1, 4);
     let mut bfs1 = BFS::new(&board1, sorting::program::MoveChoice::Good);

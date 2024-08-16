@@ -50,6 +50,7 @@ pub struct BFS {
     next_boards: HashSet<Board>,
     current_boards: HashSet<Board>,
     step_counter: usize,
+    solved_board: Option<Board>,
 }
 impl BFS {
     pub fn new(board: &Board, strategy: MoveChoice) -> Self {
@@ -61,6 +62,7 @@ impl BFS {
             current_boards: HashSet::new(),
             found_boards: HashSet::new(),
             step_counter: 0,
+            solved_board: None,
         };
         bfs.found_boards.insert(bfs.starting_board.clone());
         bfs.current_boards.insert(bfs.starting_board.clone());
@@ -87,6 +89,7 @@ impl BFS {
                     if SHOULD_PRINT {
                         println!("{}", &newboard);
                     }
+                    self.solved_board = Some(newboard.clone());
                     self.current_boards.clear();
                     return true;
                 }
@@ -173,5 +176,15 @@ mod test {
             good_len,
             unconfirmed_len
         );
+    }
+    #[test]
+    fn confirming_bug() {
+        let pile = vec![1, 5, 2, 3, 4];
+        let nbr_piles = 4;
+        let strategy = MoveChoice::Good;
+        let board = Board::new(&pile, nbr_piles);
+        let mut bfs = BFS::new(&board, strategy);
+        let potential_solution = bfs.solve();
+        assert!(bfs.solved_board.unwrap() == Board::new_solved_board(4))
     }
 }
