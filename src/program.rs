@@ -8,11 +8,10 @@
 // smallest amount of signals to get it to move from one state to another
 // ### TODO ###
 // Implement "Solution"
-use crate::validator::Solution;
-use crate::validator::{self, confirm_solution};
+use crate::validator;
+use crate::validator::*;
 use crate::{board::*, Move};
-use ::std::collections::hash_set;
-use std::{collections::HashSet, usize};
+use std::collections::HashSet;
 pub trait Program: Iterator {
     fn starting_state(&self) -> &Board;
     fn done(&self) -> bool;

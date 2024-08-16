@@ -1,6 +1,6 @@
 use ::sorting::board::Board;
 use ::sorting::program::BFS;
-use sorting::validator::Solution;
+
 //40 000 boards fine, 200 000 slowdown
 fn main() {
     let vec = vec![2, 8, 5, 9, 3, 4, 6, 1, 7];

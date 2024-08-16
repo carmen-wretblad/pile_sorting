@@ -32,11 +32,8 @@ pub fn get_solution(set: &HashSet<Board>, starting_board: &Board) -> Solution {
 pub fn board_seq_to_move(vec: &Vec<Board>) -> Solution {
     let mut vec = vec.to_owned();
     vec.remove(0);
-    let move_iter = vec
-        .into_iter()
-        .map(|x| x.last_move.clone().unwrap())
-        .collect();
-    move_iter
+
+    vec.into_iter().map(|x| x.last_move.unwrap()).collect()
 }
 pub fn confirm_solution(solution: &Solution, starting_board: &Board) -> bool {
     let mut board = starting_board.clone();
@@ -51,6 +48,6 @@ pub fn confirm_solution(solution: &Solution, starting_board: &Board) -> bool {
     board.solved()
 }
 
-fn get_all_solutions(map: &HashMap<Board, Vec<Move>>) -> Vec<Solution> {
+fn get_all_solutions(_map: &HashMap<Board, Vec<Move>>) -> Vec<Solution> {
     unimplemented!();
 }
