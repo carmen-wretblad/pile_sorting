@@ -112,7 +112,8 @@ impl BFS {
         false
     }
     pub fn get_full_solution(&self) -> Option<Solution> {
-        let solution = validator::get_solution(&self.found_boards, &self.starting_board);
+        let solution =
+            validator::get_solution(&self.found_boards, &self.starting_board, &self.strategy);
         if confirm_solution(&solution, &self.starting_board) {
             Some(solution)
         } else {
@@ -121,7 +122,8 @@ impl BFS {
     }
     pub fn solution_lenght(&mut self) -> usize {
         while !self.internal_step() {}
-        let solution = validator::get_solution(&self.found_boards, &self.starting_board);
+        let solution =
+            validator::get_solution(&self.found_boards, &self.starting_board, &self.strategy);
         solution.len()
     }
     pub fn solve(&mut self) -> Option<Solution> {
