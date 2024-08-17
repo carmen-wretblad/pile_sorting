@@ -514,4 +514,29 @@ pub mod tests {
             assert!(set.contains(&board));
         }
     }
+    #[test]
+    fn partial_equality_test() {
+        let pile1 = [1, 4, 3, 2];
+        let pile2 = [1, 4, 2, 3];
+        let mut board1 = Board::new(&pile1, 4);
+        let mut board2 = Board::new(&pile2, 4);
+        let mut board3 = Board::new(&pile1, 5);
+        assert!(board1 == board1);
+        assert!(board2 == board2);
+        assert!(board3 == board3);
+        assert!(board1 != board2);
+        assert!(board1 != board3);
+
+        board1.perform_move([0, 1], "partial eq test"); // [2] [1,4,3]
+        board2.perform_move([0, 1], "partial eq test"); // [3] [1,4,2]
+
+        board1.perform_move([1, 2], "partial eq test"); // [3][2][1,4]
+        board2.perform_move([1, 2], "partial eq test"); // [3][2][1,4]
+
+        assert!(board1 == board2);
+
+        board1.perform_move([0, 1], "partial eq test"); // [3,2][1,4]
+        assert!(board1 != board2);
+        assert!(board1 == board1);
+    }
 }
