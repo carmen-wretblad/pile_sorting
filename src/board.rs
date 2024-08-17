@@ -347,7 +347,7 @@ impl Board {
 #[cfg(test)]
 pub mod tests {
     use super::*;
-    use std::collections::{hash_set, HashSet};
+    use std::collections::HashSet;
 
     #[test]
     fn new_board() {
@@ -503,9 +503,15 @@ pub mod tests {
             assert!(set.contains(&board));
             assert_eq!(set.get(&board).unwrap(), board);
         }
-        for board in all_board {
+        for board in &all_board {
             assert!(set.contains(&board));
-            assert_eq!(set.get(&board).unwrap(), &board);
+            assert_eq!(&set.get(&board).unwrap(), &board);
+        }
+        for mut board in all_board {
+            board.perform_move([0, 1], "hashing_test");
+            assert!(!set.contains(&board));
+            set.insert(board.clone());
+            assert!(set.contains(&board));
         }
     }
 }
