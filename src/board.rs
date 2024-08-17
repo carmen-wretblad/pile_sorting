@@ -28,9 +28,8 @@ pub struct Board {
 /// Hashing is based on relative pile positions
 impl Hash for Board {
     fn hash<H: Hasher>(&self, state: &mut H) {
-        for pile in self.relative_piles() {
-            pile.hash(state);
-        }
+        let pile = self.relative_piles();
+        pile.hash(state);
     }
 }
 impl Eq for Board {}

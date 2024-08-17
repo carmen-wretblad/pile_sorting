@@ -1,10 +1,11 @@
 use crate::board::*;
 use crate::program::MoveChoice;
 use crate::Move;
-use std::collections::hash_map::*;
-use std::collections::hash_set::*;
 pub type Solution = Vec<Move>;
+use indexmap::IndexSet;
+use std::collections::HashSet;
 const VALIDATOR_SHOULD_PRINT: bool = true;
+
 pub fn get_solution(
     set: &HashSet<Board>,
     starting_board: &Board,
@@ -66,8 +67,4 @@ pub fn confirm_solution(solution: &Solution, starting_board: &Board) -> bool {
         }
     }
     board.solved()
-}
-
-fn get_all_solutions(_map: &HashMap<Board, Vec<Move>>) -> Vec<Solution> {
-    unimplemented!();
 }

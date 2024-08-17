@@ -1,9 +1,10 @@
 #![allow(unused)]
-const SHOULD_PRINT_FOUND_BOARDS: bool = false;
-const SHOULD_PRINT_STEP_COUNTER: bool = false;
+const SHOULD_PRINT_FOUND_BOARDS: bool = true;
+const SHOULD_PRINT_STEP_COUNTER: bool = true;
 use crate::validator::*;
 use crate::{board, validator};
 use crate::{board::*, Move};
+use indexmap::IndexSet;
 use std::collections::HashSet;
 /*pub trait Program: Iterator {
     fn starting_state(&self) -> &Board;

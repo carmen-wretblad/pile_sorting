@@ -7,4 +7,5 @@ edition = "2021"
 
 [dependencies]
 fxhash = "0.2.1"
+indexmap = "2.4.0"
 rand = "0.8.5"
