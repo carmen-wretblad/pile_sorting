@@ -520,7 +520,7 @@ pub mod tests {
         let pile2 = [1, 4, 2, 3];
         let mut board1 = Board::new(&pile1, 4);
         let mut board2 = Board::new(&pile2, 4);
-        let mut board3 = Board::new(&pile1, 5);
+        let board3 = Board::new(&pile1, 5);
         assert!(board1 == board1);
         assert!(board2 == board2);
         assert!(board3 == board3);
@@ -535,7 +535,7 @@ pub mod tests {
 
         assert!(board1 == board2);
 
-        board1.perform_move([0, 1], "partial eq test"); // [3,2][1,4]
+        board1.perform_move([1, 0], "partial eq test"); // [3,2][1,4]
         assert!(board1 != board2);
         assert!(board1 == board1);
     }
