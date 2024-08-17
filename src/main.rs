@@ -21,10 +21,5 @@ fn run_board_2() {
     let vec2 = vec![1, 5, 2, 4, 3];
     let board2 = Board::new(&vec2, 4);
     let mut bfs2 = BFS::new(&board2, sorting::program::MoveChoice::Valid);
-    while !bfs2.internal_step() {}
-    println!(" Done, checking solution");
-    match bfs2.get_full_solution() {
-        Some(_) => println!("success!"),
-        None => println!("failure"),
-    }
+    bfs2.solve();
 }
