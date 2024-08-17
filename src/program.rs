@@ -46,9 +46,9 @@ pub struct BFS {
     strategy: MoveChoice,
     name: String,
     starting_board: Board,
-    found_boards: HashSet<Board>,
-    next_boards: HashSet<Board>,
-    current_boards: HashSet<Board>,
+    found_boards: Vec<Board>,
+    next_boards: Vec<Board>,
+    current_boards: Vec<Board>,
     step_counter: usize,
     solved_board: Option<Board>,
 }
@@ -58,14 +58,14 @@ impl BFS {
             strategy,
             name: "BFS".to_string(),
             starting_board: board.clone(),
-            next_boards: HashSet::new(),
-            current_boards: HashSet::new(),
-            found_boards: HashSet::new(),
+            next_boards: Vec::new(),
+            current_boards: Vec::new(),
+            found_boards: Vec::new(),
             step_counter: 0,
             solved_board: None,
         };
-        bfs.found_boards.insert(bfs.starting_board.clone());
-        bfs.current_boards.insert(bfs.starting_board.clone());
+        bfs.found_boards.push(bfs.starting_board.clone());
+        bfs.current_boards.push(bfs.starting_board.clone());
         bfs
     }
     fn get_selected_moveset(&self, board: &Board) -> Vec<Move> {
@@ -85,7 +85,7 @@ impl BFS {
                     &format!("bfs with srategy {:?}", self.strategy),
                 );
                 if newboard.solved() {
-                    self.found_boards.insert(newboard.clone());
+                    self.found_boards.push(newboard.clone());
                     if SHOULD_PRINT {
                         println!("{}", &newboard);
                     }
@@ -97,8 +97,8 @@ impl BFS {
                     if SHOULD_PRINT {
                         println!("{}", &newboard)
                     };
-                    self.next_boards.insert(newboard.clone());
-                    self.found_boards.insert(newboard);
+                    self.next_boards.push(newboard.clone());
+                    self.found_boards.push(newboard);
                 }
             }
         }

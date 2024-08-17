@@ -2,25 +2,27 @@ use crate::board::*;
 use crate::program::MoveChoice;
 use crate::Move;
 use std::collections::hash_map::*;
-use std::collections::hash_set::*;
 pub type Solution = Vec<Move>;
 const VALIDATOR_SHOULD_PRINT: bool = false;
 pub fn get_solution(
-    set: &HashSet<Board>,
+    set: &Vec<Board>,
     starting_board: &Board,
     strategy_used: &MoveChoice,
 ) -> Solution {
     let nbr_piles = starting_board.piles.len();
     let mut board_sequence_inverted: Vec<Board> = Vec::new();
     let solution_board = Board::new_solved_board(nbr_piles);
-    let mut board_option: Option<Board> = set.get(&solution_board).cloned();
+    let mut board_position = set.iter().position(|x| x == &solution_board);
+
+    let mut board_option: Option<Board> = board_position.map(|x| set[x].clone());
     'outer: loop {
         match board_option {
             Some(board) => {
                 board_sequence_inverted.push(board.clone());
                 let a = board.revert();
                 if Option::is_some(&a) {
-                    board_option = set.get(&a.unwrap()).cloned();
+                    board_position = set.iter().position(|x| x == &solution_board);
+                    board_option = board_position.map(|x| set[x].clone());
                 } else {
                     break 'outer;
                 }
