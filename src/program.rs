@@ -1,19 +1,11 @@
 #![allow(unused)]
-const SHOULD_PRINT: bool = false;
-// ### Questions ###
-// Is there a trait for structs that can be created with New?
-// Answered: What happens when a struct is moved: Depends
-// If a struct has a field, is the field moved "with it?"
-// -------------------------------------------------------
-// Instresting perspecitve: you can see this as a single state machine and you want to find the
-// smallest amount of signals to get it to move from one state to another
-// ### TODO ###
-// Implement "Solution"
+const SHOULD_PRINT_FOUND_BOARDS: bool = false;
+const SHOULD_PRINT_STEP_COUNTER: bool = false;
 use crate::validator::*;
 use crate::{board, validator};
 use crate::{board::*, Move};
 use std::collections::HashSet;
-pub trait Program: Iterator {
+/*pub trait Program: Iterator {
     fn starting_state(&self) -> &Board;
     fn done(&self) -> bool;
     /// Runs the program until a new Move has been reached, must change result of done method when
@@ -32,8 +24,7 @@ pub trait Program: Iterator {
     }
     /// Returns all moves so far
     fn progress(&self) -> &Vec<Move>;
-}
-/// stuff all programs should contain
+} */
 
 #[derive(Debug)]
 pub enum MoveChoice {
@@ -76,7 +67,6 @@ impl BFS {
         }
     }
     pub fn internal_step(&mut self) -> bool {
-        //println!("{}", &self.current_boards.len());
         for board in &self.current_boards {
             for move_command in self.get_selected_moveset(board) {
                 let mut newboard = board.clone();
@@ -86,7 +76,7 @@ impl BFS {
                 );
                 if newboard.solved() {
                     self.found_boards.insert(newboard.clone());
-                    if SHOULD_PRINT {
+                    if SHOULD_PRINT_FOUND_BOARDS {
                         println!("{}", &newboard);
                     }
                     self.solved_board = Some(newboard.clone());
@@ -94,7 +84,7 @@ impl BFS {
                     return true;
                 }
                 if !self.found_boards.contains(&newboard) {
-                    if SHOULD_PRINT {
+                    if SHOULD_PRINT_FOUND_BOARDS {
                         println!("{}", &newboard)
                     };
                     self.next_boards.insert(newboard.clone());
@@ -108,7 +98,7 @@ impl BFS {
         self.current_boards = self.next_boards.clone();
         self.next_boards.clear();
         self.step_counter += 1;
-        if SHOULD_PRINT {
+        if SHOULD_PRINT_STEP_COUNTER {
             println!("step {}", self.step_counter);
         }
         assert!(!self.current_boards.is_empty());

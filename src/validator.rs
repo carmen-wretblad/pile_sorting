@@ -4,7 +4,7 @@ use crate::Move;
 use std::collections::hash_map::*;
 use std::collections::hash_set::*;
 pub type Solution = Vec<Move>;
-const VALIDATOR_SHOULD_PRINT: bool = false;
+const VALIDATOR_SHOULD_PRINT: bool = true;
 pub fn get_solution(
     set: &HashSet<Board>,
     starting_board: &Board,
@@ -40,7 +40,6 @@ pub fn get_solution(
         board_sequence_inverted[0],
         strategy_used
     );
-    //assert!(board_sequence_inverted[0].solved());
     board_seq_to_move(&board_sequence_inverted)
 }
 
