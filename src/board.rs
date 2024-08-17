@@ -154,7 +154,7 @@ impl Board {
         let mut piles_in_rel_order = Vec::new();
         let mut pile_ids: Vec<usize> = Vec::new();
 
-        for i in 0..self.piles.len() - 1 {
+        for i in 0..self.piles.len() {
             pile_ids.push(i);
         }
         pile_ids.iter_mut().for_each(|x| *x = self.rel_to_abs(*x));
