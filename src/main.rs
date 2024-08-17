@@ -23,3 +23,17 @@ fn run_board_2() {
     let mut bfs2 = BFS::new(&board2, sorting::program::MoveChoice::Valid);
     bfs2.solve();
 }
+#[cfg(test)]
+mod test {
+    use super::*;
+    #[test]
+    fn confirming_bug_2() {
+        let pile = vec![1, 5, 2, 3, 4];
+        let nbr_piles = 4;
+        let strategy = sorting::program::MoveChoice::Good;
+        let board = Board::new(&pile, nbr_piles);
+        let mut bfs = BFS::new(&board, strategy);
+        let potential_solution = bfs.solve();
+        //assert!(bfs.solved_board.unwrap() == Board::new_solved_board(4))
+    }
+}
