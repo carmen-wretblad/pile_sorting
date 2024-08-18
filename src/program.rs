@@ -1,6 +1,6 @@
 #![allow(unused)]
-const SHOULD_PRINT_FOUND_BOARDS: bool = true;
-const SHOULD_PRINT_STEP_COUNTER: bool = true;
+const SHOULD_PRINT_FOUND_BOARDS: bool = false;
+const SHOULD_PRINT_STEP_COUNTER: bool = false;
 use std::thread::current;
 
 use crate::validator::*;
@@ -124,44 +124,69 @@ impl BFS {
 #[cfg(test)]
 mod test {
     use crate::vector_util;
-
+    enum CompareTo {
+        Valid,
+        Unconfirmed,
+    }
     use super::*;
     #[test]
-    fn compare_all() {
+    fn compare_good_and_valid() {
+        let mut all_board: Vec<Board> = Vec::new();
+        for pile in vector_util::all_sequences(5) {
+            all_board.push(Board::new(&pile, 3));
+        }
+        all_board.push(Board::new(&vec![2, 5, 3, 4, 6, 1, 7], 4));
+        for board in all_board {
+            best_solution_not_exluded(&board, CompareTo::Valid);
+        }
+    }
+    #[test]
+    fn compare_good_and_unconfirmed() {
         let mut all_board: Vec<Board> = Vec::new();
         for pile in vector_util::all_sequences(5) {
             all_board.push(Board::new(&pile, 4));
         }
         all_board.push(Board::new(&vec![2, 5, 3, 4, 6, 1, 7], 4));
         for board in all_board {
-            best_solution_not_exluded(&board);
+            best_solution_not_exluded(&board, CompareTo::Unconfirmed);
         }
     }
 
-    fn best_solution_not_exluded(board: &Board) {
+    fn best_solution_not_exluded(board: &Board, compare_to: CompareTo) {
         let mut bfs_good = BFS::new(&board, MoveChoice::Good);
-        let mut bfs_valid = BFS::new(&board, MoveChoice::Valid);
-        let mut bfs_unconfirmed = BFS::new(&board, MoveChoice::Unconfirmed);
-        let valid_len = bfs_valid
-            .solve()
-            .expect("There is always a valid solution")
-            .len();
         let good_len = bfs_good
             .solve()
             .expect("There should always be a good solution")
             .len();
-        let unconfirmed_len = bfs_unconfirmed
-            .solve()
-            .expect("Unconfirmed method failed")
-            .len();
 
-        assert!(
-            valid_len == good_len && good_len == unconfirmed_len,
-            "valid: {}, good: {}, unconfirmed: {}",
-            valid_len,
-            good_len,
-            unconfirmed_len
-        );
+        match compare_to {
+            CompareTo::Valid => {
+                let mut bfs_valid = BFS::new(&board, MoveChoice::Valid);
+                let valid_len = bfs_valid
+                    .solve()
+                    .expect("There is always a valid solution")
+                    .len();
+                assert!(
+                    valid_len == good_len,
+                    "valid: {}, good: {}",
+                    valid_len,
+                    good_len,
+                );
+            }
+            CompareTo::Unconfirmed => {
+                let mut bfs_unconfirmed = BFS::new(&board, MoveChoice::Unconfirmed);
+                let unconfirmed_len = bfs_unconfirmed
+                    .solve()
+                    .expect("There is always a solution")
+                    .len();
+                assert!(
+                    unconfirmed_len == good_len,
+                    "uconfirmed: {}, good: {}",
+                    unconfirmed_len,
+                    good_len,
+                )
+            }
+        }
     }
     #[test]
     fn valid_bfs_works() {

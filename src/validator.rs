@@ -3,7 +3,7 @@ use crate::RelMove;
 pub type RelSolution = Vec<RelMove>;
 use std::collections::HashSet;
 //use indexmap::IndexSet;
-const VALIDATOR_SHOULD_PRINT: bool = true;
+const VALIDATOR_SHOULD_PRINT: bool = false;
 
 pub fn get_solution(set: &HashSet<Board>, starting_board: &Board) -> RelSolution {
     let nbr_piles = starting_board.piles.len();
@@ -15,7 +15,6 @@ pub fn get_solution(set: &HashSet<Board>, starting_board: &Board) -> RelSolution
         .to_owned();
     let mut next_board = solution_board;
     loop {
-        println!("next board is {}", next_board);
         board_sequence_inverted.push(next_board.clone());
         if next_board == starting_board.to_owned() {
             break;
@@ -30,15 +29,6 @@ pub fn get_solution(set: &HashSet<Board>, starting_board: &Board) -> RelSolution
     }
 
     board_sequence_inverted.reverse();
-    /* assert!(board_sequence_inverted.last().unwrap().solved());
-    assert!(
-        board_sequence_inverted[0] == *starting_board,
-        "expected starting board {}, but got {} \n
-        move strategy: {:?}",
-        starting_board,
-        board_sequence_inverted[0],
-        strategy_used
-    ); */
     board_seq_to_move(&board_sequence_inverted)
 }
 
@@ -52,14 +42,11 @@ pub fn board_seq_to_move(vec: &Vec<Board>) -> RelSolution {
 pub fn confirm_solution(solution: &RelSolution, starting_board: &Board) -> bool {
     let mut board = starting_board.clone();
     if VALIDATOR_SHOULD_PRINT {
-        //println!("starting board validation for: {}", &board);
+        println!("starting board validation for: {}", &board);
     }
     for abs_move_command in solution {
         let rel_move = board.abs_to_rel_move(*abs_move_command);
         board.perform_move(rel_move, "confirming_solution");
-        //board.perform_move_unchecked(rel_move);
-
-        //board.abs_to_rel_translator = starting_board.abs_to_rel_translator.clone();
         if VALIDATOR_SHOULD_PRINT {
             println!("{}", &board);
         }

@@ -208,7 +208,6 @@ impl Board {
                 }
             }
         }
-        valid_moves.retain(|x| x[1] != self.pos_of_highest_card);
         /* Speculated but not implemented: doesn't put bad cards on solutionpile.
         not sure if there are cases where such a reshuffle is required or not */
         //assert!(!valid_moves.is_empty());
@@ -218,7 +217,12 @@ impl Board {
         valid_moves
     }
     pub fn unconfirmed_validity_moves_rel(&self) -> Vec<RelMove> {
-        let moves = self.good_moves_rel();
+        let mut moves = self.good_moves_rel();
+
+        //if !self.has_solution_pile {
+        //    moves.retain(|x| x[1] != self.pos_of_highest_card) <-- Confirmed to NOT work
+        //}
+
         // perform theorised restrictions
         moves
     }
