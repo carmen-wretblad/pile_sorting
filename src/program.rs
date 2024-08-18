@@ -1,6 +1,6 @@
 #![allow(unused)]
-const SHOULD_PRINT_FOUND_BOARDS: bool = true;
-const SHOULD_PRINT_STEP_COUNTER: bool = true;
+const SHOULD_PRINT_FOUND_BOARDS: bool = false;
+const SHOULD_PRINT_STEP_COUNTER: bool = false;
 use crate::validator::*;
 use crate::{board, validator};
 use crate::{board::*, Move};
@@ -38,9 +38,9 @@ pub struct BFS {
     strategy: MoveChoice,
     name: String,
     starting_board: Board,
-    found_boards: HashSet<Board>,
-    next_boards: HashSet<Board>,
-    current_boards: HashSet<Board>,
+    found_boards: IndexSet<Board>,
+    next_boards: IndexSet<Board>,
+    current_boards: IndexSet<Board>,
     step_counter: usize,
     solved_board: Option<Board>,
 }
@@ -50,9 +50,9 @@ impl BFS {
             strategy,
             name: "BFS".to_string(),
             starting_board: board.clone(),
-            next_boards: HashSet::new(),
-            current_boards: HashSet::new(),
-            found_boards: HashSet::new(),
+            next_boards: IndexSet::new(),
+            current_boards: IndexSet::new(),
+            found_boards: IndexSet::new(),
             step_counter: 0,
             solved_board: None,
         };

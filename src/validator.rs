@@ -7,7 +7,7 @@ use std::collections::HashSet;
 const VALIDATOR_SHOULD_PRINT: bool = true;
 
 pub fn get_solution(
-    set: &HashSet<Board>,
+    set: &IndexSet<Board>,
     starting_board: &Board,
     strategy_used: &MoveChoice,
 ) -> Solution {
