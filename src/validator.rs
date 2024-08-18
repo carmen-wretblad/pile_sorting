@@ -1,16 +1,11 @@
 use crate::board::*;
-use crate::program::MoveChoice;
 use crate::RelMove;
 pub type RelSolution = Vec<RelMove>;
 use std::collections::HashSet;
-//use indexmap::HashSet;
-const VALIDATOR_SHOULD_PRINT: bool = false;
+//use indexmap::IndexSet;
+const VALIDATOR_SHOULD_PRINT: bool = true;
 
-pub fn get_solution(
-    set: &HashSet<Board>,
-    starting_board: &Board,
-    strategy_used: &MoveChoice,
-) -> RelSolution {
+pub fn get_solution(set: &HashSet<Board>, starting_board: &Board) -> RelSolution {
     let nbr_piles = starting_board.piles.len();
     let mut board_sequence_inverted: Vec<Board> = Vec::new();
     let solution_board_proxy = Board::new_solved_board(nbr_piles);
@@ -20,7 +15,7 @@ pub fn get_solution(
         .to_owned();
     let mut next_board = solution_board;
     loop {
-        //println!("next board is {}", next_board);
+        println!("next board is {}", next_board);
         board_sequence_inverted.push(next_board.clone());
         if next_board == starting_board.to_owned() {
             break;

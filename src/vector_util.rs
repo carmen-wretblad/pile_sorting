@@ -19,7 +19,9 @@ pub fn correct_sequence(input_vector: &[u8]) -> bool {
 /// Gives all possible orderings of that makes a valid starting pile with a given lenght.
 pub fn all_sequences(lenght: usize) -> Vec<Vec<u8>> {
     let base_vector: Vec<u8> = (1u8..(u8::try_from(lenght + 1).unwrap())).collect();
-    recursive_sub_sequences(base_vector)
+    let mut all_sequences = recursive_sub_sequences(base_vector);
+    all_sequences.retain(|x| x[0] != u8::try_from(lenght).unwrap());
+    all_sequences
 }
 
 fn recursive_sub_sequences(vec: Vec<u8>) -> Vec<Vec<u8>> {
@@ -52,7 +54,10 @@ mod tests {
     use super::*;
     #[test]
     fn correct_sequence_true() {
-        assert!(correct_sequence(&vec![1, 2, 3, 4, 5]))
+        assert!(correct_sequence(&vec![1, 2, 3, 4, 5]));
+        for sequence in all_sequences(5) {
+            correct_sequence(&sequence);
+        }
     }
     #[test]
     fn correct_sequence_false() {
@@ -67,8 +72,8 @@ mod tests {
             vec![1, 3, 2],
             vec![2, 1, 3],
             vec![2, 3, 1],
-            vec![3, 1, 2],
-            vec![3, 2, 1],
+            //vec![3, 1, 2],
+            //vec![3, 2, 1],
         ];
         for sequence in &sequences {
             assert!(

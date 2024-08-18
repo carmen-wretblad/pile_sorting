@@ -1,10 +1,12 @@
 #![allow(unused)]
-const SHOULD_PRINT_FOUND_BOARDS: bool = false;
-const SHOULD_PRINT_STEP_COUNTER: bool = false;
+const SHOULD_PRINT_FOUND_BOARDS: bool = true;
+const SHOULD_PRINT_STEP_COUNTER: bool = true;
+use std::thread::current;
+
 use crate::validator::*;
 use crate::{board, validator};
 use crate::{board::*, AbsMove, RelMove};
-//use indexmap::HashSet;
+//use indexmap::IndexSet;
 use std::collections::HashSet;
 /*pub trait Program: Iterator {
     fn starting_state(&self) -> &Board;
@@ -47,7 +49,7 @@ pub struct BFS {
 impl BFS {
     pub fn new(board: &Board, strategy: MoveChoice) -> Self {
         let mut bfs = BFS {
-            strategy,
+            strategy: strategy,
             name: "BFS".to_string(),
             starting_board: board.clone(),
             next_boards: HashSet::new(),
@@ -56,7 +58,6 @@ impl BFS {
             step_counter: 0,
             solved_board: None,
         };
-        bfs.found_boards.insert(bfs.starting_board.clone());
         bfs.current_boards.insert(bfs.starting_board.clone());
         bfs
     }
@@ -69,6 +70,7 @@ impl BFS {
     }
     pub fn internal_step(&mut self) -> bool {
         for board in &self.current_boards {
+            self.found_boards.insert(board.clone());
             for move_command in self.get_selected_moveset(board) {
                 let mut newboard = board.clone();
                 newboard.perform_move(
@@ -81,7 +83,6 @@ impl BFS {
                         println!("{}", &newboard);
                     }
                     self.solved_board = Some(newboard.clone());
-                    self.current_boards.clear();
                     return true;
                 }
                 if !self.found_boards.contains(&newboard) {
@@ -89,23 +90,25 @@ impl BFS {
                         println!("{}", &newboard)
                     };
                     self.next_boards.insert(newboard.clone());
-                    self.found_boards.insert(newboard);
                 }
             }
         }
-        self.current_boards.clear();
+        assert!(
+            !self.next_boards.is_empty(),
+            "Next board is empty \n starting board is: {}",
+            self.starting_board
+        );
         self.current_boards = self.next_boards.clone();
         self.next_boards.clear();
         self.step_counter += 1;
         if SHOULD_PRINT_STEP_COUNTER {
             println!("step {}", self.step_counter);
         }
-        assert!(!self.current_boards.is_empty());
+        assert!(self.solved_board.is_none());
         false
     }
     pub fn get_full_solution(&self) -> Option<RelSolution> {
-        let solution =
-            validator::get_solution(&self.found_boards, &self.starting_board, &self.strategy);
+        let solution = validator::get_solution(&self.found_boards, &self.starting_board);
         if confirm_solution(&solution, &self.starting_board) {
             Some(solution)
         } else {

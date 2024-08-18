@@ -31,8 +31,8 @@ pub struct Board {
 /// Hashing is based on relative pile positions
 impl Hash for Board {
     fn hash<H: Hasher>(&self, state: &mut H) {
-        let pile = self.relative_piles();
-        pile.hash(state);
+        let big_pile = self.relative_piles();
+        big_pile.hash(state);
     }
 }
 impl Eq for Board {}
@@ -133,10 +133,9 @@ impl Board {
                 false => non_empty_piles.push(i),
             }
         }
-
+        //let valid_to = self.abs_to_rel_translator.clone();
         let valid_from = non_empty_piles.clone();
         let mut valid_to = non_empty_piles.clone();
-
         if let Some(pile) = empty_piles.first() {
             valid_to.push(*pile)
         }
@@ -257,10 +256,14 @@ impl Board {
         let moved_higest_card = usize::from(card) == self.nbr_cards;
         let moved_on_top_of_highest_card = to_abs == self.pos_of_highest_card;
         let had_solution_pile = self.has_solution_pile;
+
         let card_diff = self.nbr_cards - usize::from(card);
         let should_go_on_top =
             (usize::wrapping_sub(self.piles[self.pos_of_highest_card].len(), card_diff)) == 0;
-        let shrink = (card_diff == 2) && should_go_on_top;
+        let shrink = self.piles[self.pos_of_highest_card].len() == 2
+            && usize::from(self.piles[self.pos_of_highest_card][0]) == self.nbr_cards
+            && usize::from(self.piles[self.pos_of_highest_card][1]) == self.nbr_cards - 1
+            && usize::from(card) == self.nbr_cards - 2;
 
         self.last_move = Some([from_abs, to_abs]);
         self.last_location_translator = Some(self.abs_to_rel_translator.clone());
