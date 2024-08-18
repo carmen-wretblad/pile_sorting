@@ -1,10 +1,10 @@
 #![allow(unused)]
-const SHOULD_PRINT_FOUND_BOARDS: bool = false;
-const SHOULD_PRINT_STEP_COUNTER: bool = false;
+const SHOULD_PRINT_FOUND_BOARDS: bool = true;
+const SHOULD_PRINT_STEP_COUNTER: bool = true;
 use crate::validator::*;
 use crate::{board, validator};
-use crate::{board::*, Move};
-use indexmap::IndexSet;
+use crate::{board::*, AbsMove, RelMove};
+//use indexmap::HashSet;
 use std::collections::HashSet;
 /*pub trait Program: Iterator {
     fn starting_state(&self) -> &Board;
@@ -38,9 +38,9 @@ pub struct BFS {
     strategy: MoveChoice,
     name: String,
     starting_board: Board,
-    found_boards: IndexSet<Board>,
-    next_boards: IndexSet<Board>,
-    current_boards: IndexSet<Board>,
+    found_boards: HashSet<Board>,
+    next_boards: HashSet<Board>,
+    current_boards: HashSet<Board>,
     step_counter: usize,
     solved_board: Option<Board>,
 }
@@ -50,9 +50,9 @@ impl BFS {
             strategy,
             name: "BFS".to_string(),
             starting_board: board.clone(),
-            next_boards: IndexSet::new(),
-            current_boards: IndexSet::new(),
-            found_boards: IndexSet::new(),
+            next_boards: HashSet::new(),
+            current_boards: HashSet::new(),
+            found_boards: HashSet::new(),
             step_counter: 0,
             solved_board: None,
         };
@@ -60,7 +60,7 @@ impl BFS {
         bfs.current_boards.insert(bfs.starting_board.clone());
         bfs
     }
-    fn get_selected_moveset(&self, board: &Board) -> Vec<Move> {
+    fn get_selected_moveset(&self, board: &Board) -> Vec<RelMove> {
         match &self.strategy {
             MoveChoice::Valid => board.valid_moves_rel(),
             MoveChoice::Good => board.good_moves_rel(),
@@ -105,7 +105,7 @@ impl BFS {
         assert!(!self.current_boards.is_empty());
         false
     }
-    pub fn get_full_solution(&self) -> Option<Solution> {
+    pub fn get_full_solution(&self) -> Option<RelSolution> {
         let solution =
             validator::get_solution(&self.found_boards, &self.starting_board, &self.strategy);
         if confirm_solution(&solution, &self.starting_board) {
@@ -120,7 +120,7 @@ impl BFS {
             validator::get_solution(&self.found_boards, &self.starting_board, &self.strategy);
         solution.len()
     }
-    pub fn solve(&mut self) -> Option<Solution> {
+    pub fn solve(&mut self) -> Option<RelSolution> {
         while !self.internal_step() {}
         self.get_full_solution()
     }

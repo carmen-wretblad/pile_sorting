@@ -4,9 +4,11 @@
 // ######
 use crate::config::*;
 use crate::vector_util;
-use crate::Move;
+use crate::AbsMove;
+use crate::RelMove;
 use std::fmt;
 use std::hash::{Hash, Hasher};
+use std::vec;
 
 pub const SOLUTION_PILE: [u8; 2] = [2, 1];
 
@@ -20,7 +22,7 @@ pub struct Board {
     highest_card_is_on_bottom: bool,
     has_solution_pile: bool,
     pos_of_highest_card: usize,
-    pub last_move: Option<Move>,
+    pub last_move: Option<AbsMove>,
     pub last_location_translator: Option<Vec<usize>>,
     last_shrunk: bool,
 }
@@ -119,7 +121,8 @@ impl Board {
     }
     /// Gives all moves(absolute) that may be performed that yields a valid state,
     /// performing any other move will cause a panic.
-    fn valid_moves_abs(&self) -> Vec<Move> {
+    fn valid_moves_abs(&self) -> Vec<RelMove> {
+        // -------------------------------------------------------------------------------------------
         let mut non_empty_piles = Vec::<usize>::new();
         let mut empty_piles = Vec::<usize>::new();
 
@@ -136,7 +139,7 @@ impl Board {
         if let Some(pile) = empty_piles.first() {
             valid_to.push(*pile)
         }
-        let mut valid_moves = Vec::<Move>::new();
+        let mut valid_moves = Vec::<AbsMove>::new();
         for from in &valid_from {
             for to in &valid_to {
                 valid_moves.push([*from, *to])
@@ -150,20 +153,26 @@ impl Board {
         valid_moves
     }
     fn relative_piles(&self) -> Vec<Vec<u8>> {
+        let start: u8 = 200;
+        let end: u8 = 222;
         let mut piles_in_rel_order = Vec::new();
         let mut pile_ids: Vec<usize> = Vec::new();
-
         for i in 0..self.piles.len() {
             pile_ids.push(i);
         }
+
         pile_ids.iter_mut().for_each(|x| *x = self.rel_to_abs(*x));
         for i in pile_ids {
-            piles_in_rel_order.push(self.piles[i].clone());
+            let mut pile = self.piles[i].clone();
+            pile.insert(0, start);
+            pile.push(end);
+            piles_in_rel_order.push(pile);
         }
+
         piles_in_rel_order
     }
 
-    pub fn valid_moves_rel(&self) -> Vec<Move> {
+    pub fn valid_moves_rel(&self) -> Vec<RelMove> {
         self.valid_moves_abs()
             .into_iter()
             .map(|x| self.abs_to_rel_move(x))
@@ -171,13 +180,13 @@ impl Board {
     }
 
     /// Returns all moves(relative) that may lead to a better solution.
-    pub fn good_moves_rel(&self) -> Vec<Move> {
+    pub fn good_moves_rel(&self) -> Vec<RelMove> {
         let next_card_needed = self.nbr_cards - self.piles[self.pos_of_highest_card].len();
         if self.solved() {
             return vec![];
         }
         let mut valid_moves = self.valid_moves_abs();
-        valid_moves.retain(|x| self.not_last_move(x)); // you never need to undo the last move.
+        //valid_moves.retain(|x| self.not_last_move(x)); // you never need to undo the last move.
         valid_moves.retain(|x| x[0] != x[1]); /* picking up and putting down a card in the same
                                               // place is meaningless */
 
@@ -211,18 +220,18 @@ impl Board {
 
         valid_moves
     }
-    pub fn unconfirmed_validity_moves_rel(&self) -> Vec<Move> {
+    pub fn unconfirmed_validity_moves_rel(&self) -> Vec<RelMove> {
         let moves = self.good_moves_rel();
         // perform theorised restrictions
         moves
     }
-    fn not_last_move(&self, move_command: &Move) -> bool {
+    fn not_last_move(&self, move_command: &AbsMove) -> bool {
         match self.last_move {
             Some(last_move) => last_move != *move_command,
             None => true,
         }
     }
-    pub fn perform_move(&mut self, move_command: Move, caller_name: &str) {
+    pub fn perform_move(&mut self, move_command: RelMove, caller_name: &str) {
         assert!(
             self.valid_moves_rel().contains(&move_command),
             "move command {:?}, wasn't contained in the valid commands: {:?} (rel) || {:?} (abs), \n 
@@ -237,7 +246,7 @@ impl Board {
         self.perform_move_unchecked(move_command)
     }
     /// Performs a move. Move instructions are "relative".
-    pub fn perform_move_unchecked(&mut self, move_command: Move) {
+    pub fn perform_move_unchecked(&mut self, move_command: RelMove) {
         // seperate into move and place logic?
 
         let from_rel = move_command[0];
@@ -290,7 +299,7 @@ impl Board {
     fn abs_to_rel(&self, abs_val: usize) -> usize {
         self.abs_to_rel_translator[abs_val]
     }
-    pub fn abs_to_rel_move(&self, abs_move: Move) -> Move {
+    pub fn abs_to_rel_move(&self, abs_move: AbsMove) -> RelMove {
         [self.abs_to_rel(abs_move[0]), self.abs_to_rel(abs_move[1])]
     }
 
@@ -300,7 +309,7 @@ impl Board {
             .position(|x| *x == rel_val)
             .expect("All values should be present")
     }
-    pub fn rel_to_abs_move(&self, rel_move: Move) -> Move {
+    pub fn rel_to_abs_move(&self, rel_move: RelMove) -> AbsMove {
         [self.rel_to_abs(rel_move[0]), self.rel_to_abs(rel_move[1])]
     }
 

@@ -1,6 +1,7 @@
 #![allow(dead_code)]
 
-pub type Move = [usize; 2];
+pub type AbsMove = [usize; 2];
+pub type RelMove = [usize; 2];
 pub mod board;
 pub mod config;
 pub mod program;

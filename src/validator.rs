@@ -1,16 +1,16 @@
 use crate::board::*;
 use crate::program::MoveChoice;
-use crate::Move;
-pub type Solution = Vec<Move>;
-use indexmap::IndexSet;
+use crate::RelMove;
+pub type RelSolution = Vec<RelMove>;
 use std::collections::HashSet;
+//use indexmap::HashSet;
 const VALIDATOR_SHOULD_PRINT: bool = true;
 
 pub fn get_solution(
-    set: &IndexSet<Board>,
+    set: &HashSet<Board>,
     starting_board: &Board,
     strategy_used: &MoveChoice,
-) -> Solution {
+) -> RelSolution {
     let nbr_piles = starting_board.piles.len();
     let mut board_sequence_inverted: Vec<Board> = Vec::new();
     let solution_board = Board::new_solved_board(nbr_piles);
@@ -44,14 +44,14 @@ pub fn get_solution(
     board_seq_to_move(&board_sequence_inverted)
 }
 
-pub fn board_seq_to_move(vec: &Vec<Board>) -> Solution {
+pub fn board_seq_to_move(vec: &Vec<Board>) -> RelSolution {
     let mut vec = vec.to_owned();
     assert!(vec[0].last_move.is_none());
     vec.remove(0);
     vec.into_iter().map(|x| x.last_move.unwrap()).collect()
 }
 
-pub fn confirm_solution(solution: &Solution, starting_board: &Board) -> bool {
+pub fn confirm_solution(solution: &RelSolution, starting_board: &Board) -> bool {
     let mut board = starting_board.clone();
     if VALIDATOR_SHOULD_PRINT {
         println!("starting board validation for: {}", &board);
