@@ -144,7 +144,7 @@ mod test {
     fn compare_good_and_unconfirmed() {
         let mut all_board: Vec<Board> = Vec::new();
         for pile in vector_util::all_sequences(5) {
-            all_board.push(Board::new(&pile, 4));
+            all_board.push(Board::new(&pile, 5));
         }
         all_board.push(Board::new(&vec![2, 5, 3, 4, 6, 1, 7], 4));
         for board in all_board {

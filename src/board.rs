@@ -218,18 +218,20 @@ impl Board {
     }
     pub fn unconfirmed_validity_moves_rel(&self) -> Vec<RelMove> {
         let mut moves = self.good_moves_rel();
+        /*if !self.has_solution_pile {
+            moves.retain(|x| x[1] != self.pos_of_highest_card) // <-- Confirmed to NOT work.
+        }*/
+        moves.iter_mut().for_each(|x| *x = self.rel_to_abs_move(*x));
+        moves.retain(|x| !self.is_last_move(x)); // you never need to undo the last move. <-- This
+                                                 // seems to work
+        moves.iter_mut().for_each(|x| *x = self.abs_to_rel_move(*x));
 
-        //if !self.has_solution_pile {
-        //    moves.retain(|x| x[1] != self.pos_of_highest_card) <-- Confirmed to NOT work
-        //}
-
-        // perform theorised restrictions
         moves
     }
-    fn not_last_move(&self, move_command: &AbsMove) -> bool {
+    fn is_last_move(&self, move_command: &AbsMove) -> bool {
         match self.last_move {
-            Some(last_move) => last_move != *move_command,
-            None => true,
+            Some(last_move) => last_move[1] == move_command[0] && last_move[0] == move_command[1],
+            None => false,
         }
     }
     pub fn perform_move(&mut self, move_command: RelMove, caller_name: &str) {
