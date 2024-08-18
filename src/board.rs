@@ -6,6 +6,7 @@ use crate::config::*;
 use crate::vector_util;
 use crate::AbsMove;
 use crate::RelMove;
+use core::panic;
 use std::fmt;
 use std::hash::{Hash, Hasher};
 use std::vec;
@@ -160,7 +161,6 @@ impl Board {
         for i in 0..self.piles.len() {
             pile_ids.push(i);
         }
-
         pile_ids.iter_mut().for_each(|x| *x = self.rel_to_abs(*x));
         let mut pile_in_rel_order = Vec::new();
         for i in pile_ids {
@@ -216,7 +216,6 @@ impl Board {
         valid_moves
             .iter_mut()
             .for_each(|x| *x = self.abs_to_rel_move(*x));
-
         valid_moves
     }
     pub fn unconfirmed_validity_moves_rel(&self) -> Vec<RelMove> {
@@ -333,9 +332,9 @@ impl Board {
         }
         // order rel based on highest card
     }
-    pub fn revert(&self) -> Option<Board> {
+    pub fn revert(&self) -> Board {
         match self.last_move {
-            None => None,
+            None => panic!(),
             Some(some_move) => {
                 let mut the_move = some_move;
                 the_move.reverse();
@@ -346,7 +345,7 @@ impl Board {
                 }
                 board.perform_move_unchecked(self.abs_to_rel_move(the_move));
                 board.last_move = None;
-                Some(board)
+                board
             }
         }
     }

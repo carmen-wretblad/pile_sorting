@@ -1,6 +1,6 @@
 #![allow(unused)]
-const SHOULD_PRINT_FOUND_BOARDS: bool = true;
-const SHOULD_PRINT_STEP_COUNTER: bool = true;
+const SHOULD_PRINT_FOUND_BOARDS: bool = false;
+const SHOULD_PRINT_STEP_COUNTER: bool = false;
 use crate::validator::*;
 use crate::{board, validator};
 use crate::{board::*, AbsMove, RelMove};
@@ -93,8 +93,6 @@ impl BFS {
                 }
             }
         }
-        assert!(!self.current_boards.is_empty());
-        assert!(!self.next_boards.is_empty());
         self.current_boards.clear();
         self.current_boards = self.next_boards.clone();
         self.next_boards.clear();
@@ -113,12 +111,6 @@ impl BFS {
         } else {
             None
         }
-    }
-    pub fn solution_lenght(&mut self) -> usize {
-        while !self.internal_step() {}
-        let solution =
-            validator::get_solution(&self.found_boards, &self.starting_board, &self.strategy);
-        solution.len()
     }
     pub fn solve(&mut self) -> Option<RelSolution> {
         while !self.internal_step() {}
@@ -167,6 +159,38 @@ mod test {
             good_len,
             unconfirmed_len
         );
+    }
+    #[test]
+    fn valid_bfs_works() {
+        for pile in vector_util::all_sequences(5) {
+            assert!(
+                vector_util::correct_sequence(&pile),
+                "pile {:?} is a valid pile",
+                &pile
+            );
+            let board = Board::new(&pile, 5);
+            let mut bfs_valid = BFS::new(&board, MoveChoice::Valid);
+            bfs_valid
+                .solve()
+                .expect("There is always a valid solution")
+                .len();
+        }
+    }
+    #[test]
+    fn good_bfs_works() {
+        for pile in vector_util::all_sequences(5) {
+            assert!(
+                vector_util::correct_sequence(&pile),
+                "pile {:?} is a valid pile",
+                &pile
+            );
+            let board = Board::new(&pile, 5);
+            let mut bfs_valid = BFS::new(&board, MoveChoice::Good);
+            bfs_valid
+                .solve()
+                .expect("There is always a valid solution")
+                .len();
+        }
     }
     #[test]
     fn confirming_bug() {

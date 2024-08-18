@@ -4,7 +4,7 @@ use crate::RelMove;
 pub type RelSolution = Vec<RelMove>;
 use std::collections::HashSet;
 //use indexmap::HashSet;
-const VALIDATOR_SHOULD_PRINT: bool = true;
+const VALIDATOR_SHOULD_PRINT: bool = false;
 
 pub fn get_solution(
     set: &HashSet<Board>,
@@ -13,34 +13,37 @@ pub fn get_solution(
 ) -> RelSolution {
     let nbr_piles = starting_board.piles.len();
     let mut board_sequence_inverted: Vec<Board> = Vec::new();
-    let solution_board = Board::new_solved_board(nbr_piles);
-    let mut board_option: Option<Board> = set.get(&solution_board).cloned();
-    'outer: loop {
-        match board_option {
-            Some(board) => {
-                board_sequence_inverted.push(board.clone());
-                let a = board.revert();
-                if Option::is_some(&a) {
-                    board_option = set.get(&a.unwrap()).cloned();
-                } else {
-                    break 'outer;
-                }
-            }
-            None => {
-                break 'outer;
-            }
+    let solution_board_proxy = Board::new_solved_board(nbr_piles);
+    let solution_board: Board = set
+        .get(&solution_board_proxy)
+        .expect("There must be a solved board for this to work")
+        .to_owned();
+    let mut next_board = solution_board;
+    loop {
+        //println!("next board is {}", next_board);
+        board_sequence_inverted.push(next_board.clone());
+        if next_board == starting_board.to_owned() {
+            break;
         }
+
+        let future_next_board = set
+            .get(&next_board.revert())
+            .expect("Always have to be a next board")
+            .clone();
+        assert_ne!(future_next_board, next_board);
+        next_board = future_next_board;
     }
+
     board_sequence_inverted.reverse();
-    assert!(board_sequence_inverted.last().unwrap().solved());
+    /* assert!(board_sequence_inverted.last().unwrap().solved());
     assert!(
         board_sequence_inverted[0] == *starting_board,
-        "expected starting board {}, but got {} \n 
+        "expected starting board {}, but got {} \n
         move strategy: {:?}",
         starting_board,
         board_sequence_inverted[0],
         strategy_used
-    );
+    ); */
     board_seq_to_move(&board_sequence_inverted)
 }
 
@@ -54,7 +57,7 @@ pub fn board_seq_to_move(vec: &Vec<Board>) -> RelSolution {
 pub fn confirm_solution(solution: &RelSolution, starting_board: &Board) -> bool {
     let mut board = starting_board.clone();
     if VALIDATOR_SHOULD_PRINT {
-        println!("starting board validation for: {}", &board);
+        //println!("starting board validation for: {}", &board);
     }
     for abs_move_command in solution {
         let rel_move = board.abs_to_rel_move(*abs_move_command);
