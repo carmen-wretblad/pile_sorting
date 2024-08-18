@@ -152,7 +152,7 @@ impl Board {
         // doesn't take from one pile and put into same
         valid_moves
     }
-    fn relative_piles(&self) -> Vec<Vec<u8>> {
+    fn relative_piles(&self) -> Vec<u8> {
         let start: u8 = 200;
         let end: u8 = 222;
         let mut piles_in_rel_order = Vec::new();
@@ -162,13 +162,12 @@ impl Board {
         }
 
         pile_ids.iter_mut().for_each(|x| *x = self.rel_to_abs(*x));
+        let mut pile_in_rel_order = Vec::new();
         for i in pile_ids {
-            let mut pile = self.piles[i].clone();
-            pile.insert(0, start);
-            pile.push(end);
-            piles_in_rel_order.push(pile);
+            pile_in_rel_order.push(start);
+            piles_in_rel_order.append(&mut self.piles[i].clone());
+            piles_in_rel_order.push(end);
         }
-
         piles_in_rel_order
     }
 
