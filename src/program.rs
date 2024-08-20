@@ -133,7 +133,7 @@ mod test {
     fn compare_good_and_valid() {
         let mut all_board: Vec<Board> = Vec::new();
         for pile in vector_util::all_sequences(5) {
-            all_board.push(Board::new(&pile, 3));
+            all_board.push(Board::new(&pile, 4));
         }
         all_board.push(Board::new(&vec![2, 5, 3, 4, 6, 1, 7], 4));
         for board in all_board {
@@ -144,9 +144,26 @@ mod test {
     fn compare_good_and_unconfirmed() {
         let mut all_board: Vec<Board> = Vec::new();
         for pile in vector_util::all_sequences(5) {
-            all_board.push(Board::new(&pile, 5));
+            all_board.push(Board::new(&pile, 4));
         }
-        all_board.push(Board::new(&vec![2, 5, 3, 4, 6, 1, 7], 4));
+        for pile in vector_util::all_sequences(5) {
+            all_board.push(Board::new(&pile, 3));
+        }
+
+        all_board.push(Board::new(&vec![2, 7, 6, 5, 4, 1, 3], 3));
+        all_board.push(Board::new(&vec![2, 1, 3, 4, 5, 7, 6], 3));
+        all_board.push(Board::new(&vec![6, 5, 3, 4, 2, 1, 7], 3));
+
+        all_board.push(Board::new(&vec![2, 7, 6, 5, 4, 1, 3], 4));
+        all_board.push(Board::new(&vec![2, 1, 3, 4, 5, 7, 6], 4));
+        all_board.push(Board::new(&vec![6, 5, 3, 4, 2, 1, 7], 4));
+
+        all_board.push(Board::new(&vec![2, 7, 6, 5, 4, 1, 3], 5));
+        all_board.push(Board::new(&vec![2, 1, 3, 4, 5, 7, 6], 5));
+        all_board.push(Board::new(&vec![6, 5, 3, 4, 1, 2, 7], 5));
+
+        all_board.push(Board::new(&vec![2, 7, 6, 5, 4, 1, 3, 8], 5));
+
         for board in all_board {
             best_solution_not_exluded(&board, CompareTo::Unconfirmed);
         }

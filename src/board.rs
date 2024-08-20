@@ -197,6 +197,8 @@ impl Board {
                 valid_moves.retain(|x| !(x[0] == i && x[1] == self.pos_of_highest_card));
             }
             valid_moves.retain(|x| x[0] != self.pos_of_highest_card); // never remove card from solutionpile
+        } else {
+            valid_moves.retain(|x| x[1] != self.pos_of_highest_card);
         }
         valid_moves.retain(|x| !self.is_last_move(x));
         valid_moves
@@ -205,11 +207,7 @@ impl Board {
         valid_moves
     }
     pub fn unconfirmed_validity_moves_rel(&self) -> Vec<RelMove> {
-        let moves = self.good_moves_rel();
-
-        /*if !self.has_solution_pile {
-            moves.retain(|x| x[1] != self.pos_of_highest_card) // <-- Confirmed to NOT work.
-        }*/
+        let mut moves = self.good_moves_rel();
 
         /* if !self.has_solution_pile {  // <-- Doesn't work perfectly
             for (i, pile) in self.piles.iter().enumerate() {
@@ -222,8 +220,13 @@ impl Board {
             }
         } */
 
-        //moves.iter_mut().for_each(|x| *x = self.rel_to_abs_move(*x));
-        //moves.iter_mut().for_each(|x| *x = self.abs_to_rel_move(*x));
+        moves.iter_mut().for_each(|x| *x = self.rel_to_abs_move(*x));
+        moves.retain(|x| !self.is_last_move(x));
+
+        /*if !self.has_solution_pile {   <-- Implemented
+            moves.retain(|x| x[1] != self.pos_of_highest_card)
+        }*/
+        moves.iter_mut().for_each(|x| *x = self.abs_to_rel_move(*x));
 
         moves
     }
