@@ -1,18 +1,44 @@
+use std::usize;
+
+use ::sorting::bfs::BFS;
 use ::sorting::board::Board;
-use ::sorting::program::BFS;
+use sorting::vector_util::{self, all_sequences};
+use sorting::{bfs, board};
 fn main() {
-    run_board();
+    stats();
+    //run_board();
 }
 fn run_board() {
-    let vec1 = vec![2, 5, 3, 4, 6, 1, 7];
-    let board1 = Board::new(&vec1, 4);
-    let mut bfs1 = BFS::new(&board1, sorting::program::MoveChoice::Good);
-    while !bfs1.internal_step() {}
-    println!(" Done, checking solution");
-    match bfs1.get_full_solution() {
-        Some(_) => println!("success!"),
-        None => println!("failure"),
-    }
+    let vec = [1, 5, 2, 4, 3];
+    let board = Board::new(&vec, 5);
+    let mut bfs = BFS::new(&board, sorting::bfs::MoveChoice::Good);
+    println!("{}", bfs.solve().unwrap().len());
 }
 
-fn stats() {}
+fn stats() {
+    for nbr_cards in 5..8 {
+        for nbr_piles in 4..6 {
+            let mut longest = 0;
+            let mut average = 0;
+            let mut amount_looked_at = 0;
+            for sequence in all_sequences(nbr_cards) {
+                let board = Board::new(&sequence, nbr_piles);
+                let lenght = BFS::new(&board, bfs::MoveChoice::Good)
+                    .solve()
+                    .expect("must have a solution")
+                    .len();
+                average += lenght;
+                amount_looked_at += 1;
+                if lenght > longest {
+                    longest = lenght;
+                }
+            }
+            let average = average / amount_looked_at;
+
+            println!(
+                "cards: {}, piles {}, max: {}, average {}",
+                nbr_cards, nbr_piles, longest, average
+            );
+        }
+    }
+}
