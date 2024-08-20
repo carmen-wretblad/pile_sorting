@@ -187,7 +187,6 @@ impl Board {
         //valid_moves.retain(|x| self.not_last_move(x)); // you never need to undo the last move.
         valid_moves.retain(|x| x[0] != x[1]); /* picking up and putting down a card in the same
                                               // place is meaningless */
-
         if self.has_solution_pile {
             for (i, pile) in self.piles.iter().enumerate() {
                 let last = pile.last();
@@ -195,20 +194,18 @@ impl Board {
                     let move_command = [i, self.pos_of_highest_card];
                     return vec![self.abs_to_rel_move(move_command)];
                 }
+                valid_moves.retain(|x| !(x[0] == i && x[1] == self.pos_of_highest_card));
             }
             valid_moves.retain(|x| x[0] != self.pos_of_highest_card); // never remove card from solutionpile
         }
-
-        /* Speculated but not implemented: doesn't put bad cards on solutionpile.
-        not sure if there are cases where such a reshuffle is required or not */
-        //assert!(!valid_moves.is_empty());
+        valid_moves.retain(|x| !self.is_last_move(x));
         valid_moves
             .iter_mut()
             .for_each(|x| *x = self.abs_to_rel_move(*x));
         valid_moves
     }
     pub fn unconfirmed_validity_moves_rel(&self) -> Vec<RelMove> {
-        let mut moves = self.good_moves_rel();
+        let moves = self.good_moves_rel();
 
         /*if !self.has_solution_pile {
             moves.retain(|x| x[1] != self.pos_of_highest_card) // <-- Confirmed to NOT work.
@@ -225,10 +222,8 @@ impl Board {
             }
         } */
 
-        moves.iter_mut().for_each(|x| *x = self.rel_to_abs_move(*x));
-        moves.retain(|x| !self.is_last_move(x)); // you never need to undo the last move. <-- This
-                                                 // seems to work
-        moves.iter_mut().for_each(|x| *x = self.abs_to_rel_move(*x));
+        //moves.iter_mut().for_each(|x| *x = self.rel_to_abs_move(*x));
+        //moves.iter_mut().for_each(|x| *x = self.abs_to_rel_move(*x));
 
         moves
     }
