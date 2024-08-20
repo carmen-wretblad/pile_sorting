@@ -2,7 +2,7 @@ use crate::board::*;
 use crate::RelMove;
 pub type RelSolution = Vec<RelMove>;
 use std::collections::HashSet;
-//use indexmap::IndexSet;
+//use fxhash::FxHashSet;
 const VALIDATOR_SHOULD_PRINT: bool = false;
 
 pub fn get_solution(set: &HashSet<Board>, starting_board: &Board) -> RelSolution {
@@ -21,7 +21,7 @@ pub fn get_solution(set: &HashSet<Board>, starting_board: &Board) -> RelSolution
         }
 
         let future_next_board = set
-            .get(&next_board.revert())
+            .get(&next_board.get_reverted())
             .expect("Always have to be a next board")
             .clone();
         assert_ne!(future_next_board, next_board);

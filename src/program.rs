@@ -6,29 +6,8 @@ use std::thread::current;
 use crate::validator::*;
 use crate::{board, validator};
 use crate::{board::*, AbsMove, RelMove};
-//use indexmap::IndexSet;
+//use fxhash::FxHashSet;
 use std::collections::HashSet;
-/*pub trait Program: Iterator {
-    fn starting_state(&self) -> &Board;
-    fn done(&self) -> bool;
-    /// Runs the program until a new Move has been reached, must change result of done method when
-    /// applicable
-    fn step(&mut self) -> Option<Move>;
-    /// Runs the program to completion.
-    /// Will return new moves made only
-    fn run(&mut self) -> Vec<Move> {
-        let mut vec: Vec<Move> = Vec::<Move>::new();
-        while (!self.done()) {
-            if let Some(value) = self.step() {
-                vec.push(value)
-            }
-        }
-        vec
-    }
-    /// Returns all moves so far
-    fn progress(&self) -> &Vec<Move>;
-} */
-
 #[derive(Debug)]
 pub enum MoveChoice {
     Valid,
@@ -49,7 +28,7 @@ pub struct BFS {
 impl BFS {
     pub fn new(board: &Board, strategy: MoveChoice) -> Self {
         let mut bfs = BFS {
-            strategy: strategy,
+            strategy,
             name: "BFS".to_string(),
             starting_board: board.clone(),
             next_boards: HashSet::new(),
@@ -123,6 +102,8 @@ impl BFS {
 
 #[cfg(test)]
 mod test {
+    // main.rs
+
     use crate::vector_util;
     enum CompareTo {
         Valid,

@@ -1,4 +1,4 @@
-#![allow(dead_code)]
+//#![allow(dead_code)]
 
 pub type AbsMove = [usize; 2];
 pub type RelMove = [usize; 2];
