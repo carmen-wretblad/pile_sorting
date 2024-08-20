@@ -198,16 +198,7 @@ impl Board {
             }
             valid_moves.retain(|x| x[0] != self.pos_of_highest_card); // never remove card from solutionpile
         }
-        if !self.has_solution_pile {
-            for (i, pile) in self.piles.iter().enumerate() {
-                if pile.is_empty()
-                    && usize::from(*self.piles[self.pos_of_highest_card].last().unwrap())
-                        == self.nbr_cards
-                {
-                    return vec![self.abs_to_rel_move([self.pos_of_highest_card, i])];
-                }
-            }
-        }
+
         /* Speculated but not implemented: doesn't put bad cards on solutionpile.
         not sure if there are cases where such a reshuffle is required or not */
         //assert!(!valid_moves.is_empty());
@@ -218,9 +209,22 @@ impl Board {
     }
     pub fn unconfirmed_validity_moves_rel(&self) -> Vec<RelMove> {
         let mut moves = self.good_moves_rel();
+
         /*if !self.has_solution_pile {
             moves.retain(|x| x[1] != self.pos_of_highest_card) // <-- Confirmed to NOT work.
         }*/
+
+        /* if !self.has_solution_pile {  // <-- Doesn't work perfectly
+            for (i, pile) in self.piles.iter().enumerate() {
+                if pile.is_empty()
+                    && usize::from(*self.piles[self.pos_of_highest_card].last().unwrap())
+                        == self.nbr_cards
+                {
+                    return vec![self.abs_to_rel_move([self.pos_of_highest_card, i])];
+                }
+            }
+        } */
+
         moves.iter_mut().for_each(|x| *x = self.rel_to_abs_move(*x));
         moves.retain(|x| !self.is_last_move(x)); // you never need to undo the last move. <-- This
                                                  // seems to work
