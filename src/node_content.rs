@@ -9,6 +9,7 @@ enum NodeStatus {
 
 pub type NodeRelation = (BoardRep, RelMove);
 
+#[derive(Clone)]
 pub struct NodeContent {
     pub parents: NodeRelations,
     pub children: NodeRelations,
@@ -28,6 +29,9 @@ pub struct NodeRelations {
     items: Vec<NodeRelation>,
 }
 impl NodeRelations {
+    pub fn get_items(&self) -> Vec<NodeRelation> {
+        self.items.clone()
+    }
     pub fn new() -> Self {
         Self {
             status: NodeStatus::Building,
@@ -38,6 +42,7 @@ impl NodeRelations {
         assert!(self.status == NodeStatus::Building);
         self.items.push(parent.clone());
     }
+
     pub fn has_item(&self, item_representation: &BoardRep) -> bool {
         self.items.iter().any(|x| x.0 == *item_representation)
     }
