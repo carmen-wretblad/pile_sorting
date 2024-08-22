@@ -1,18 +1,30 @@
 #[allow(unused, dead_code)]
 use ::sorting::bfs::BFS;
 use ::sorting::board::Board;
+
+use sorting::node_holder::NodeHolder;
 use sorting::vector_util::{self, all_sequences};
 use sorting::{bfs, board};
 use std::usize;
 fn main() {
-    stats();
+    //stats();
     //run_board();
+    test_node_holder();
 }
 fn run_board() {
     let vec = [1, 5, 2, 4, 3];
     let board = Board::new(&vec, 5);
     let mut bfs = BFS::new(&board, sorting::bfs::MoveChoice::Good);
     println!("{}", bfs.solve().unwrap().len());
+}
+
+fn test_node_holder() {
+    let vec = [1, 5, 2, 4, 3];
+    let board = Board::new(&vec, 5);
+    let mut holder = NodeHolder::new(&board);
+    while !holder.is_solved() {
+        holder.step();
+    }
 }
 
 fn stats() {
