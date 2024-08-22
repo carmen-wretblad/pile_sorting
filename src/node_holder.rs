@@ -5,6 +5,7 @@ use crate::node_content::NodeContent;
 use crate::BoardRep;
 use crate::RelMove;
 use std::collections::HashMap;
+use std::collections::HashSet;
 use std::usize;
 
 struct ProgramInfo {
@@ -23,6 +24,7 @@ pub struct NodeHolder {
     nodes: HashMap<BoardRep, NodeContent>,
     pub board_counter: usize,
     pub steps: usize,
+    pub bad_boards: HashSet<BoardRep>,
 }
 impl NodeHolder {
     pub fn new(board: &Board) -> Self {
@@ -40,6 +42,7 @@ impl NodeHolder {
             nodes: HashMap::new(),
             board_counter: 0,
             steps: 0,
+            bad_boards: HashSet::new(),
         }
     }
 
@@ -89,8 +92,10 @@ impl NodeHolder {
     }
 
     fn prune_future_generation(&mut self, nbr_cards: usize) {
+        println!("before removing: {}", self.future_generation.len());
         self.future_generation
             .retain(|x| x.0.nbr_cards == nbr_cards);
+        println!("after removing:  {}", self.future_generation.len());
     }
 
     fn generation_shift(&mut self) {
@@ -106,18 +111,28 @@ impl NodeHolder {
         self.future_generation.clear();
     }
     fn spawn_future_generation(&mut self) {
+        let new_generation_boards_reps: Vec<Vec<u8>> = self
+            .new_generation
+            .iter()
+            .map(|x| x.0.relative_piles())
+            .collect();
         for (board, content) in &mut self.new_generation {
             let children = board.good_children();
             for (child, move_performed) in children {
-                content
-                    .children
-                    .add_item(&(child.relative_piles(), move_performed));
+                if !new_generation_boards_reps.contains(&child.relative_piles())
+                    && !self.nodes.contains_key(&child.relative_piles())
+                    && !self.bad_boards.contains(&child.relative_piles())
+                {
+                    content
+                        .children
+                        .add_item(&(child.relative_piles(), move_performed));
 
-                let mut new_content = NodeContent::new();
-                new_content
-                    .parents
-                    .add_item(&(board.relative_piles(), move_performed));
-                self.future_generation.push((child, new_content))
+                    let mut new_content = NodeContent::new();
+                    new_content
+                        .parents
+                        .add_item(&(board.relative_piles(), move_performed));
+                    self.future_generation.push((child, new_content));
+                }
             }
         }
     }
@@ -125,6 +140,14 @@ impl NodeHolder {
     fn future_generation_contains(&self, boardrep: &BoardRep) -> bool {
         for (future_board, _) in &self.future_generation {
             if boardrep == &future_board.relative_piles() {
+                return true;
+            }
+        }
+        false
+    }
+    fn new_generation_contains(&self, boardrep: &BoardRep) -> bool {
+        for (new_board, _) in &self.new_generation {
+            if boardrep == &new_board.relative_piles() {
                 return true;
             }
         }
