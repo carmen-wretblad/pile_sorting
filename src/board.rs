@@ -1,3 +1,4 @@
+use crate::BoardRep;
 //  ##### TODO #######
 // Look into the possibility of using mem::swap for replacing values
 // Consider tracking higest and lowest card for each pile
@@ -151,7 +152,8 @@ impl Board {
         // doesn't take from one pile and put into same
         valid_moves
     }
-    fn relative_piles(&self) -> Vec<u8> {
+
+    pub fn relative_piles(&self) -> BoardRep {
         let start: u8 = 200;
         let end: u8 = 222;
         let mut piles_in_rel_order = Vec::new();

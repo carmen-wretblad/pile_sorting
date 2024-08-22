@@ -6,7 +6,6 @@ use std::thread::current;
 use crate::validator::*;
 use crate::{board, validator};
 use crate::{board::*, AbsMove, RelMove};
-//use fxhash::FxHashSet;
 use std::collections::HashSet;
 #[derive(Debug)]
 pub enum MoveChoice {

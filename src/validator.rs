@@ -2,7 +2,6 @@ use crate::board::*;
 use crate::RelMove;
 pub type RelSolution = Vec<RelMove>;
 use std::collections::HashSet;
-//use fxhash::FxHashSet;
 const VALIDATOR_SHOULD_PRINT: bool = false;
 
 pub fn get_solution(set: &HashSet<Board>, starting_board: &Board) -> RelSolution {

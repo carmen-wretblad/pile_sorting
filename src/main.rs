@@ -1,9 +1,8 @@
-use std::usize;
-
 use ::sorting::bfs::BFS;
 use ::sorting::board::Board;
 use sorting::vector_util::{self, all_sequences};
 use sorting::{bfs, board};
+use std::usize;
 fn main() {
     stats();
     //run_board();
