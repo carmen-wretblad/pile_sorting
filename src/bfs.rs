@@ -2,6 +2,7 @@
 const SHOULD_PRINT_FOUND_BOARDS: bool = false;
 const SHOULD_PRINT_STEP_COUNTER: bool = false;
 use std::thread::current;
+use std::usize;
 
 use crate::validator::*;
 use crate::{board, validator};
@@ -21,8 +22,9 @@ pub struct BFS {
     found_boards: HashSet<Board>,
     next_boards: HashSet<Board>,
     current_boards: HashSet<Board>,
-    step_counter: usize,
+    pub step_counter: usize,
     solved_board: Option<Board>,
+    pub board_counter: usize,
 }
 impl BFS {
     pub fn new(board: &Board, strategy: MoveChoice) -> Self {
@@ -35,6 +37,7 @@ impl BFS {
             found_boards: HashSet::new(),
             step_counter: 0,
             solved_board: None,
+            board_counter: 0,
         };
         bfs.current_boards.insert(bfs.starting_board.clone());
         bfs
@@ -68,6 +71,7 @@ impl BFS {
                         println!("{}", &newboard)
                     };
                     self.next_boards.insert(newboard.clone());
+                    self.board_counter += 1;
                 }
             }
         }

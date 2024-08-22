@@ -21,6 +21,8 @@ pub struct NodeHolder {
     new_generation: Vec<(Board, NodeContent)>,
     future_generation: Vec<(Board, NodeContent)>,
     nodes: HashMap<BoardRep, NodeContent>,
+    pub board_counter: usize,
+    pub steps: usize,
 }
 impl NodeHolder {
     pub fn new(board: &Board) -> Self {
@@ -36,6 +38,8 @@ impl NodeHolder {
             new_generation: vec![(board.clone(), NodeContent::new())], //todo
             future_generation: Vec::new(),
             nodes: HashMap::new(),
+            board_counter: 0,
+            steps: 0,
         }
     }
 
@@ -47,8 +51,8 @@ impl NodeHolder {
         let nbr_cards = self.get_local_heuristic();
         self.prune_future_generation(nbr_cards);
         self.remove_local_childless();
-        //self.remove_local_unneeded();
         self.generation_shift();
+        self.steps += 1;
     }
     fn get_local_heuristic(&self) -> usize {
         let mut local_heuristic = usize::MAX;
@@ -71,12 +75,10 @@ impl NodeHolder {
         self.new_generation
             .retain(|item| board_to_keep.contains(&item.0));
     }
-    fn remove_local_unneeded(&mut self) {
-        unimplemented!();
-    }
     fn check_solved(&self) -> bool {
         for (new_board, _) in &self.future_generation {
             if new_board.solved() {
+                println!("solved! {}", &new_board);
                 return true;
             }
         }
@@ -93,14 +95,13 @@ impl NodeHolder {
 
     fn generation_shift(&mut self) {
         for node in &self.new_generation {
-            println!("inserting board {}", node.0);
             self.nodes.insert(node.0.relative_piles(), node.1.clone());
+            self.board_counter += 1;
         }
         self.new_generation.clear();
-        let _ = self
-            .future_generation
-            .iter()
-            .map(|item| self.new_generation.push(item.clone()));
+        for future_board in &self.future_generation {
+            self.new_generation.push(future_board.clone())
+        }
 
         self.future_generation.clear();
     }

@@ -8,23 +8,27 @@ use sorting::{bfs, board};
 use std::usize;
 fn main() {
     //stats();
-    //run_board();
     test_node_holder();
+    run_board();
 }
 fn run_board() {
-    let vec = [1, 5, 2, 4, 3];
+    let vec = [1, 5, 6, 3, 8, 4, 7, 2];
     let board = Board::new(&vec, 5);
     let mut bfs = BFS::new(&board, sorting::bfs::MoveChoice::Good);
     println!("{}", bfs.solve().unwrap().len());
+    println!("bfs board counter {} ", bfs.board_counter);
+    println!("bfs steps: {}", bfs.step_counter);
 }
 
 fn test_node_holder() {
-    let vec = [1, 5, 2, 4, 3];
+    let vec = [1, 5, 6, 3, 8, 4, 7, 2];
     let board = Board::new(&vec, 5);
     let mut holder = NodeHolder::new(&board);
     while !holder.is_solved() {
         holder.step();
     }
+    println!("holder boards found {}", holder.board_counter);
+    println!("holder steps {}", holder.steps);
 }
 
 fn stats() {
