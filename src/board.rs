@@ -350,6 +350,15 @@ impl Board {
             }
         }
     }
+    pub fn good_children(&self) -> Vec<(Board, RelMove)> {
+        let mut children = Vec::new();
+        for move_action in self.good_moves_rel() {
+            let mut board = self.clone();
+            board.perform_move(move_action, "good children");
+            children.push((board, move_action));
+        }
+        children
+    }
 }
 #[cfg(test)]
 pub mod tests {

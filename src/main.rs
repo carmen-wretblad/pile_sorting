@@ -1,3 +1,4 @@
+#[allow(unused, dead_code)]
 use ::sorting::bfs::BFS;
 use ::sorting::board::Board;
 use sorting::vector_util::{self, all_sequences};
