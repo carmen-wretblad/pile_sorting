@@ -3,7 +3,6 @@ use crate::board;
 use crate::board::Board;
 use crate::node_content::NodeContent;
 use crate::BoardRep;
-use crate::RelMove;
 use std::collections::HashMap;
 use std::collections::HashSet;
 use std::usize;
@@ -17,11 +16,11 @@ struct ProgramInfo {
 
 pub struct NodeHolder {
     info: ProgramInfo,
-    steps_taken: usize,
     solved_flag: bool,
     new_generation: Vec<(Board, NodeContent)>,
     future_generation: Vec<(Board, NodeContent)>,
     nodes: HashMap<BoardRep, NodeContent>,
+    max_height_previous: usize,
     pub board_counter: usize,
     pub steps: usize,
     pub bad_boards: HashSet<BoardRep>,
@@ -35,11 +34,11 @@ impl NodeHolder {
                 nbr_piles: board.piles.len(),
                 innitial_nbr_cards: board.nbr_cards,
             },
-            steps_taken: 0,
             solved_flag: false,
             new_generation: vec![(board.clone(), NodeContent::new())], //todo
             future_generation: Vec::new(),
             nodes: HashMap::new(),
+            max_height_previous: board.nbr_cards,
             board_counter: 0,
             steps: 0,
             bad_boards: HashSet::new(),
@@ -50,21 +49,28 @@ impl NodeHolder {
         self.spawn_future_generation();
         if self.check_solved() {
             self.solved_flag = true;
+        } else {
+            let nbr_cards = self.get_local_heuristic();
+            self.prune_future_generation(nbr_cards);
+            self.remove_local_childless();
+            self.generation_shift();
+            self.steps += 1;
         }
-        let nbr_cards = self.get_local_heuristic();
-        self.prune_future_generation(nbr_cards);
-        self.remove_local_childless();
-        self.generation_shift();
-        self.steps += 1;
     }
-    fn get_local_heuristic(&self) -> usize {
-        let mut local_heuristic = usize::MAX;
+    fn get_local_heuristic(&mut self) -> usize {
+        let mut local_nbr_cards = usize::MAX;
+        let mut local_max_height = usize::MIN;
         for (board, _) in &self.future_generation {
-            if board.nbr_cards < local_heuristic {
-                local_heuristic = board.nbr_cards
+            if board.nbr_cards < local_nbr_cards {
+                local_nbr_cards = board.nbr_cards
+            }
+
+            if board.max_height() > local_max_height {
+                local_max_height = board.max_height()
             }
         }
-        local_heuristic
+        self.max_height_previous = local_max_height;
+        local_nbr_cards
     }
     fn remove_local_childless(&mut self) {
         let mut board_to_keep = Vec::new();
@@ -122,6 +128,8 @@ impl NodeHolder {
                 if !new_generation_boards_reps.contains(&child.relative_piles())
                     && !self.nodes.contains_key(&child.relative_piles())
                     && !self.bad_boards.contains(&child.relative_piles())
+                    && (child.max_height() <= self.max_height_previous
+                        || self.steps < self.info.innitial_nbr_cards / 2)
                 {
                     content
                         .children

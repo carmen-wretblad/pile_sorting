@@ -9,10 +9,10 @@ use std::usize;
 fn main() {
     //stats();
     test_node_holder();
-    //run_board();
+    run_board();
 }
 fn run_board() {
-    let vec = [1, 5, 6, 3, 8, 4, 7, 2];
+    let vec = [1, 5, 6, 3, 4, 7, 2];
     let board = Board::new(&vec, 5);
     let mut bfs = BFS::new(&board, sorting::bfs::MoveChoice::Good);
     println!("{}", bfs.solve().unwrap().len());
@@ -21,7 +21,7 @@ fn run_board() {
 }
 
 fn test_node_holder() {
-    let vec = [1, 5, 6, 3, 10, 8, 9, 4, 7, 2, 12, 11];
+    let vec = [1, 5, 6, 3, 4, 7, 2];
     let board = Board::new(&vec, 5);
     let mut holder = NodeHolder::new(&board);
     while !holder.is_solved() {

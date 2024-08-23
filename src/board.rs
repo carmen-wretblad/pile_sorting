@@ -10,6 +10,7 @@ use crate::RelMove;
 use core::panic;
 use std::fmt;
 use std::hash::{Hash, Hasher};
+use std::usize;
 use std::vec;
 
 pub const SOLUTION_PILE: [u8; 2] = [2, 1];
@@ -120,6 +121,12 @@ impl Board {
     pub fn new_solved_board(nbr_piles: usize) -> Board {
         Board::new(&[3, 2, 1], nbr_piles) //this will get shrunk to [2,1], which is to small to
                                           //create manually
+    }
+    pub fn heights(&self) -> Vec<usize> {
+        self.piles.iter().map(|x| x.len()).collect()
+    }
+    pub fn max_height(&self) -> usize {
+        *self.heights().iter().max().unwrap()
     }
     /// Gives all moves(absolute) that may be performed that yields a valid state,
     /// performing any other move will cause a panic.
