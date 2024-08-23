@@ -21,6 +21,13 @@ impl NodeContent {
             children: NodeRelations::new(),
         }
     }
+    pub fn get_children(&self) -> Vec<BoardRep> {
+        let mut children = Vec::new();
+        for (board_rep, rel_move) in self.children.get_items() {
+            children.push(board_rep);
+        }
+        children
+    }
 }
 
 #[derive(Clone)]

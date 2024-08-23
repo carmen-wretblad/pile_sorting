@@ -9,7 +9,7 @@ use std::usize;
 fn main() {
     //stats();
     test_node_holder();
-    run_board();
+    //run_board();
 }
 fn run_board() {
     let vec = [1, 5, 6, 3, 4, 7, 2];
@@ -21,7 +21,7 @@ fn run_board() {
 }
 
 fn test_node_holder() {
-    let vec = [1, 5, 6, 3, 4, 7, 2];
+    let vec = [1, 9, 5, 6, 3, 8, 4, 7, 12, 2, 16, 11, 14, 15, 13, 10];
     let board = Board::new(&vec, 5);
     let mut holder = NodeHolder::new(&board);
     while !holder.is_solved() {

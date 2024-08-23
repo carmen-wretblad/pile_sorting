@@ -52,6 +52,7 @@ impl NodeHolder {
         } else {
             let nbr_cards = self.get_local_heuristic();
             self.prune_future_generation(nbr_cards);
+            //self.prune_new_generation();
             self.remove_local_childless();
             self.generation_shift();
             self.steps += 1;
@@ -102,7 +103,24 @@ impl NodeHolder {
         self.future_generation
             .retain(|x| x.0.nbr_cards == nbr_cards);
         println!("after removing:  {}", self.future_generation.len());
+
+        if self.future_generation.len() < 100 {
+        } else if self.future_generation.len() < 500 {
+        } else {
+        }
     }
+    /*fn prune_new_generation(&mut self) {
+        println!("before removing new: {}", self.future_generation.len());
+        let mut list_of_stuff_to_keep: Vec<Board> = Vec::new();
+        for (board, content) in &self.new_generation {
+            if self.future_generation_contains_some(&content.get_children()) {
+                list_of_stuff_to_keep.push(board.clone());
+            }
+        }
+        self.new_generation
+            .retain(|x| list_of_stuff_to_keep.contains(&x.0));
+        println!("after removing new:  {}", self.future_generation.len());
+    } */
 
     fn generation_shift(&mut self) {
         for node in &self.new_generation {
@@ -139,6 +157,9 @@ impl NodeHolder {
                     new_content
                         .parents
                         .add_item(&(board.relative_piles(), move_performed));
+                    if child.max_height() < self.max_height_previous {
+                        self.max_height_previous = child.max_height();
+                    }
                     self.future_generation.push((child, new_content));
                 }
             }
@@ -149,6 +170,16 @@ impl NodeHolder {
         for (future_board, _) in &self.future_generation {
             if boardrep == &future_board.relative_piles() {
                 return true;
+            }
+        }
+        false
+    }
+    fn future_generation_contains_some(&self, boardreps: &Vec<BoardRep>) -> bool {
+        for (future_board, _) in &self.future_generation {
+            for board_rep in boardreps {
+                if board_rep == &future_board.relative_piles() {
+                    return true;
+                }
             }
         }
         false
