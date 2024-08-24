@@ -9,6 +9,12 @@ enum NodeStatus {
 
 pub type NodeRelation = (BoardRep, RelMove);
 
+impl Default for NodeRelations {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 #[derive(Clone)]
 pub struct NodeContent {
     pub parents: NodeRelations,
@@ -23,10 +29,15 @@ impl NodeContent {
     }
     pub fn get_children(&self) -> Vec<BoardRep> {
         let mut children = Vec::new();
-        for (board_rep, rel_move) in self.children.get_items() {
+        for (board_rep, _) in self.children.get_items() {
             children.push(board_rep);
         }
         children
+    }
+}
+impl Default for NodeContent {
+    fn default() -> Self {
+        Self::new()
     }
 }
 

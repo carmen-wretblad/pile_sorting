@@ -15,7 +15,7 @@ pub fn get_solution(set: &HashSet<Board>, starting_board: &Board) -> RelSolution
     let mut next_board = solution_board;
     loop {
         board_sequence_inverted.push(next_board.clone());
-        if next_board == starting_board.to_owned() {
+        if next_board == *starting_board {
             break;
         }
 

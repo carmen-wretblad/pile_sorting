@@ -1,4 +1,3 @@
-use crate::board;
 #[allow(unused, dead_code)]
 use crate::board::Board;
 use crate::node_content::NodeContent;
@@ -52,7 +51,6 @@ impl NodeHolder {
         } else {
             let nbr_cards = self.get_local_heuristic();
             self.prune_future_generation(nbr_cards);
-            //self.prune_new_generation();
             self.remove_local_childless();
             self.generation_shift();
             self.steps += 1;
@@ -77,7 +75,7 @@ impl NodeHolder {
         let mut board_to_keep = Vec::new();
         for (new_board, new_content) in &self.new_generation {
             for (child, _) in &new_content.children.get_items() {
-                if self.future_generation_contains(&child) {
+                if self.future_generation_contains(child) {
                     board_to_keep.push(new_board.clone());
                 }
             }
@@ -103,11 +101,14 @@ impl NodeHolder {
         self.future_generation
             .retain(|x| x.0.nbr_cards == nbr_cards);
         println!("after removing:  {}", self.future_generation.len());
-
+        /*
         if self.future_generation.len() < 100 {
+            unimplemented!();
         } else if self.future_generation.len() < 500 {
+            unimplemented!();
         } else {
-        }
+            unimplemented!();
+        }*/
     }
     /*fn prune_new_generation(&mut self) {
         println!("before removing new: {}", self.future_generation.len());
@@ -148,6 +149,8 @@ impl NodeHolder {
                     && !self.bad_boards.contains(&child.relative_piles())
                     && (child.max_height() <= self.max_height_previous
                         || self.steps < self.info.innitial_nbr_cards / 2)
+                //&& ((child.max_height() + self.steps) < self.info.innitial_nbr_cards <-- bad
+                //    || self.steps < self.info.innitial_nbr_cards / 3)
                 {
                     content
                         .children

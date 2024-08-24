@@ -2,14 +2,13 @@
 use ::sorting::bfs::BFS;
 use ::sorting::board::Board;
 
+use sorting::bfs;
 use sorting::node_holder::NodeHolder;
-use sorting::vector_util::{self, all_sequences};
-use sorting::{bfs, board};
-use std::usize;
+use sorting::vector_util::all_sequences;
 fn main() {
     //stats();
     test_node_holder();
-    //run_board();
+    run_board();
 }
 fn run_board() {
     let vec = [1, 5, 6, 3, 4, 7, 2];
