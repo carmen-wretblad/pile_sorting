@@ -1,5 +1,5 @@
 use crate::BoardRep;
-use std::usize;
+use std::{u8, usize};
 
 trait Sortedness {
     fn heights(&self) -> Vec<usize>;
@@ -12,11 +12,51 @@ trait Sortedness {
     }
     fn sortedness(&self) -> usize;
     fn nbr_cards(&self) -> usize;
-    fn has_solution_pile(&self) -> usize;
+    fn has_solution_pile(&self) -> bool;
     fn next_card(&self) -> u8;
-    fn depth_of_card(&self, card: u8) -> usize;
-    fn depth_of_next_card(&self) -> usize {
+    fn depth_of_card(&self, card: u8) -> Option<usize>;
+    fn depth_of_next_card(&self) -> Option<usize> {
         self.depth_of_card(self.next_card())
+    }
+}
+type Piles = Vec<Vec<u8>>;
+
+impl Sortedness for Piles {
+    fn heights(&self) -> Vec<usize> {
+        self.iter().map(|w| w.len()).collect()
+    }
+    fn sortedness(&self) -> usize {
+        let mut agg = 0;
+        for vec in self {
+            agg += sortedness_vector(vec);
+        }
+        agg
+    }
+    fn nbr_cards(&self) -> usize {
+        self.iter().map(|w| w.len()).sum()
+    }
+    fn has_solution_pile(&self) -> bool {
+        usize::from(self[0][0]) == self.nbr_cards()
+    }
+    fn next_card(&self) -> u8 {
+        let nbr_cards: u8 =
+            u8::try_from(self.nbr_cards()).expect("Can't have more cards than fit in an u8");
+        if !self.has_solution_pile() {
+            return nbr_cards;
+        }
+        if self[0].len() < 2 || self[0][1] != nbr_cards - 1 {
+            return nbr_cards - 1;
+        }
+        nbr_cards - 2
+    }
+    fn depth_of_card(&self, card: u8) -> Option<usize> {
+        for pile in self {
+            match pile.iter().position(|x| *x == card) {
+                Some(position) => return Some(pile.len() - (position + 1)),
+                None => (),
+            }
+        }
+        None
     }
 }
 
