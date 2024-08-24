@@ -46,8 +46,42 @@ fn max_height(vectors: &[Vec<u8>]) -> usize {
     vectors.iter().map(|w| w.len()).max().unwrap()
 }
 
+fn nbr_cards(piles: &Vec<Vec<u8>>) -> usize {
+    piles.iter().map(|w| w.len()).sum()
+}
+
+fn has_solution_pile(piles: &Vec<Vec<u8>>) -> bool {
+    usize::from(piles[0][0]) == nbr_cards(piles)
+}
+fn depth_of_card(piles: &Vec<Vec<u8>>, card: u8) -> Option<usize> {
+    for pile in piles {
+        match pile.iter().position(|x| *x == card) {
+            Some(position) => return Some(pile.len() - (position + 1)),
+            None => (),
+        }
+    }
+    None
+}
+fn next_card(piles: &Vec<Vec<u8>>) -> u8 {
+    let nbr_cards: u8 = u8::try_from(nbr_cards(piles)).unwrap();
+    if !has_solution_pile(piles) {
+        return nbr_cards;
+    }
+    if piles[0].len() < 2 || piles[0][1] != nbr_cards - 1 {
+        return nbr_cards - 1;
+    }
+    nbr_cards - 2
+}
+fn depth_of_next_card(piles: &Vec<Vec<u8>>) -> Option<usize> {
+    let nbr_cards: u8 = u8::try_from(nbr_cards(piles)).unwrap();
+    let next_card = next_card(piles);
+    depth_of_card(piles, next_card)
+}
+
 #[cfg(test)]
 mod tests {
+    use crate::sortedness::{depth_of_card, has_solution_pile};
+
     use super::*;
     #[test]
     fn sortedness_valid() {
@@ -78,5 +112,33 @@ mod tests {
     fn heights_test() {
         let piles = &[[4, 5, 2].to_vec(), [6, 1].to_vec(), [7, 8, 9, 10].to_vec()];
         assert_eq!(max_height(piles), 4);
+    }
+    #[test]
+    fn nbr_cards_test() {
+        let piles = ([[4, 5, 2].to_vec(), [6, 1].to_vec(), [7, 8, 9, 10].to_vec()]).to_vec();
+        assert_eq!(nbr_cards(&piles), 9);
+    }
+    #[test]
+    fn has_solution_pile_test() {
+        let piles_true = ([[5, 4].to_vec(), [2, 1, 3].to_vec()]).to_vec();
+        assert!(has_solution_pile(&piles_true));
+
+        let piles_false = ([[4, 5].to_vec(), [2, 1, 3].to_vec()]).to_vec();
+        assert!(!has_solution_pile(&piles_false));
+    }
+    #[test]
+    fn depth_of_card_test() {
+        let piles = ([[4, 5, 2].to_vec(), [6, 1].to_vec(), [7, 8, 9, 10].to_vec()]).to_vec();
+        assert_eq!(depth_of_card(&piles, 8), Some(2));
+    }
+    #[test]
+    fn next_card_test() {
+        let piles = ([[5, 4].to_vec(), [2, 1, 3].to_vec()]).to_vec();
+        assert_eq!(next_card(&piles), 3);
+    }
+    #[test]
+    fn depth_of_next_card_test() {
+        let piles = ([[5, 4].to_vec(), [2, 1, 3].to_vec()]).to_vec();
+        assert_eq!(depth_of_next_card(&piles), Some(0));
     }
 }
