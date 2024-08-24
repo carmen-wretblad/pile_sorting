@@ -1,8 +1,13 @@
-use std::iter::Sum;
+use crate::BoardRep;
 use std::usize;
 
-use crate::board::Board;
-use crate::BoardRep;
+pub fn sortendess_boardrep(board_rep: &BoardRep) -> usize {
+    sortedness_vector_list(&boardrep_to_piles(board_rep))
+}
+
+pub fn max_height_boardrep(board_rep: &BoardRep) -> usize {
+    max_height(&boardrep_to_piles(board_rep))
+}
 
 fn boardrep_to_piles(vector: &[u8]) -> Vec<Vec<u8>> {
     let mut piles: Vec<Vec<u8>> = Vec::new();
@@ -37,7 +42,7 @@ fn sortedness_vector_list(vectors: &[Vec<u8>]) -> usize {
     agg
 }
 
-fn max_heights(vectors: &[Vec<u8>]) -> usize {
+fn max_height(vectors: &[Vec<u8>]) -> usize {
     vectors.iter().map(|w| w.len()).max().unwrap()
 }
 
@@ -72,6 +77,6 @@ mod tests {
     #[test]
     fn heights_test() {
         let piles = &[[4, 5, 2].to_vec(), [6, 1].to_vec(), [7, 8, 9, 10].to_vec()];
-        assert_eq!(max_heights(piles), 4);
+        assert_eq!(max_height(piles), 4);
     }
 }
