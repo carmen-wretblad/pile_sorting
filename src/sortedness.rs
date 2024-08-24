@@ -29,39 +29,11 @@ trait Sortedness {
         }
     }
 }
-//#[derive(PartialEq, Eq, PartialOrd, Ord)]
+#[derive(PartialEq, Eq, PartialOrd, Ord)]
 struct OrderObject {
     next_card: u8,
     depth_of_next_card: usize,
     sortedness: usize,
-}
-impl PartialEq for OrderObject {
-    fn eq(&self, other: &Self) -> bool {
-        self.next_card == other.next_card
-            && self.depth_of_next_card == other.depth_of_next_card
-            && self.sortedness == other.sortedness
-    }
-}
-impl Eq for OrderObject {}
-impl PartialOrd for OrderObject {
-    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        match self.next_card.cmp(&other.next_card) {
-            Greater => return Some(Greater),
-            Less => return Some(Less),
-            Equal => (),
-        }
-        match self.depth_of_next_card.cmp(&other.depth_of_next_card) {
-            Greater => return Some(Greater),
-            Less => return Some(Less),
-            Equal => (),
-        }
-        Some(self.sortedness.cmp(&other.sortedness))
-    }
-}
-impl Ord for OrderObject {
-    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        self.partial_cmp(other).expect("Ordering is total")
-    }
 }
 
 type Piles = Vec<Vec<u8>>;
@@ -232,6 +204,6 @@ mod tests {
     #[test]
     fn depth_of_next_card_test() {
         let piles: Piles = ([[5, 4].to_vec(), [2, 1, 3].to_vec()]).to_vec();
-        assert_eq!(piles.depth_of_next_card(), Some(0));
+        assert_eq!(piles.depth_of_next_card(), 0);
     }
 }
