@@ -7,8 +7,8 @@ use sorting::node_holder::NodeHolder;
 use sorting::vector_util::all_sequences;
 fn main() {
     //stats();
-    //test_node_holder();
-    run_board();
+    test_node_holder();
+    //run_board();
 }
 fn run_board() {
     let vec = [1, 8, 4, 7, 2, 3, 6, 5];
@@ -20,7 +20,7 @@ fn run_board() {
 }
 
 fn test_node_holder() {
-    let vec = [1, 9, 5, 6, 3, 8, 4, 7, 17, 12, 2, 16, 11, 14, 15, 13, 10];
+    let vec = [1, 9, 5, 6, 3, 8, 4, 7, 12, 2, 11, 14, 13, 10];
     let board = Board::new(&vec, 5);
     let mut holder = NodeHolder::new(&board);
     while !holder.is_solved() {

@@ -1,5 +1,5 @@
 use crate::{board::Board, BoardRep};
-use std::cmp::Ord;
+use std::cmp::{max, Ord};
 use std::fmt::Debug;
 use std::{u8, usize};
 
@@ -35,6 +35,9 @@ pub trait Sortedness: Debug {
             depth_of_next_card: self.depth_of_next_card(),
             sortedness: self.sortedness(),
         }
+    }
+    fn theoretical_minimum(&self) -> usize {
+        usize::from(self.next_card()) + max(self.depth_of_next_card(), self.sortedness())
     }
 }
 #[derive(PartialEq, Eq, PartialOrd, Ord, Debug)]

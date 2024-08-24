@@ -24,6 +24,7 @@ pub struct NodeHolder {
     max_height_previous: usize,
     pub board_counter: usize,
     pub steps: usize,
+    past_minimum: usize,
     pub bad_boards: HashSet<BoardRep>,
 }
 impl NodeHolder {
@@ -42,6 +43,7 @@ impl NodeHolder {
             max_height_previous: board.nbr_cards,
             board_counter: 0,
             steps: 0,
+            past_minimum: usize::MAX,
             bad_boards: HashSet::new(),
         }
     }
@@ -53,7 +55,7 @@ impl NodeHolder {
         } else {
             let nbr_cards = self.get_local_heuristic();
             self.prune_future_generation(nbr_cards);
-            self.remove_local_childless();
+            //self.remove_local_childless();
             self.generation_shift();
             self.steps += 1;
         }
@@ -61,6 +63,8 @@ impl NodeHolder {
     fn get_local_heuristic(&mut self) -> usize {
         let mut local_nbr_cards = usize::MAX;
         let mut local_max_height = usize::MIN;
+        let mut minimum = usize::MAX;
+        let mut maximum = usize::MIN;
         for (board, _) in &self.future_generation {
             if board.nbr_cards < local_nbr_cards {
                 local_nbr_cards = board.nbr_cards
@@ -69,8 +73,17 @@ impl NodeHolder {
             if board.max_height() > local_max_height {
                 local_max_height = board.max_height()
             }
+            if board.theoretical_minimum() < minimum {
+                minimum = board.theoretical_minimum();
+            }
+            if board.theoretical_minimum() > maximum {
+                maximum = board.theoretical_minimum();
+            }
         }
         self.max_height_previous = local_max_height;
+        println!("maximum: {maximum}");
+        println!("minimum: {minimum}");
+        self.past_minimum = minimum;
         local_nbr_cards
     }
     fn remove_local_childless(&mut self) {
@@ -100,15 +113,17 @@ impl NodeHolder {
 
     fn prune_future_generation(&mut self, nbr_cards: usize) {
         println!("before removing: {}", self.future_generation.len());
+        //self.future_generation
+        //    .retain(|x| x.0.nbr_cards == nbr_cards);
         self.future_generation
-            .retain(|x| x.0.nbr_cards == nbr_cards);
+            .retain(|x| x.0.theoretical_minimum() < self.past_minimum + 1);
 
-        if self.future_generation.len() < 2000 {
+        /* if self.future_generation.len() < 10000 {
         } else {
             self.future_generation
                 .sort_by(|a, b| a.0.order_object().cmp(&b.0.order_object()));
-            self.future_generation.drain(2000..);
-        }
+            self.future_generation.drain(10000..);
+        } */
         println!("after removing:  {}", self.future_generation.len());
     }
     /*fn prune_new_generation(&mut self) {
@@ -147,9 +162,9 @@ impl NodeHolder {
             for (child, move_performed) in children {
                 if !new_generation_boards_reps.contains(&child.relative_piles())
                     && !self.nodes.contains_key(&child.relative_piles())
-                    && !self.bad_boards.contains(&child.relative_piles())
-                    && (child.max_height() <= self.max_height_previous
-                        || self.steps < self.info.innitial_nbr_cards / 2)
+                //&& !self.bad_boards.contains(&child.relative_piles())
+                //&& (child.max_height() <= self.max_height_previous
+                //    || self.steps < self.info.innitial_nbr_cards / 2)
                 //&& ((child.max_height() + self.steps) < self.info.innitial_nbr_cards <-- bad
                 //    || self.steps < self.info.innitial_nbr_cards / 3)
                 {

@@ -1,3 +1,4 @@
+use crate::sortedness::Sortedness;
 use crate::BoardRep;
 //  ##### TODO #######
 // Look into the possibility of using mem::swap for replacing values
@@ -67,7 +68,15 @@ impl fmt::Display for Board {
                 write!(f, " _")?;
             }
         }
-        write!(f, ">")
+        write!(f, ">")?;
+        write!(
+            f,
+            "({}): {} + max({},{})",
+            self.theoretical_minimum(),
+            self.next_card(),
+            self.depth_of_next_card(),
+            self.sortedness()
+        )
     }
 }
 
