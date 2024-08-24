@@ -1,6 +1,25 @@
 use crate::BoardRep;
 use std::usize;
 
+trait Sortedness {
+    fn heights(&self) -> Vec<usize>;
+    fn max_height(&self) -> usize {
+        *self
+            .heights()
+            .iter()
+            .max()
+            .expect("Can't create empty boards")
+    }
+    fn sortedness(&self) -> usize;
+    fn nbr_cards(&self) -> usize;
+    fn has_solution_pile(&self) -> usize;
+    fn next_card(&self) -> u8;
+    fn depth_of_card(&self, card: u8) -> usize;
+    fn depth_of_next_card(&self) -> usize {
+        self.depth_of_card(self.next_card())
+    }
+}
+
 pub fn sortendess_boardrep(board_rep: &BoardRep) -> usize {
     sortedness_vector_list(&boardrep_to_piles(board_rep))
 }
