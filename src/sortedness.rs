@@ -4,6 +4,19 @@ use std::usize;
 use crate::board::Board;
 use crate::BoardRep;
 
+fn boardrep_to_piles(vector: &[u8]) -> Vec<Vec<u8>> {
+    let mut piles: Vec<Vec<u8>> = Vec::new();
+    let mut holder: Vec<u8> = Vec::new();
+    for el in vector {
+        match el {
+            200 => holder.clear(),
+            222 => piles.push(holder.clone()),
+            _ => holder.push(*el),
+        }
+    }
+    piles
+}
+
 pub fn sortedness_vector(vector: &[u8]) -> usize {
     let differences: Vec<i16> = vector
         .windows(2)
@@ -24,6 +37,10 @@ fn sortedness_vector_list(vectors: &[Vec<u8>]) -> usize {
     agg
 }
 
+fn max_heights(vectors: &[Vec<u8>]) -> usize {
+    vectors.iter().map(|w| w.len()).max().unwrap()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -42,5 +59,19 @@ mod tests {
             ]),
             5
         );
+    }
+    #[test]
+    fn boardrep_to_piles_test() {
+        let start = 200u8;
+        let end = 222u8;
+        let vec: &[u8] = &[start, 4, 2, end, start, 3, 1, end];
+        let result: Vec<Vec<u8>> = boardrep_to_piles(vec);
+        let expected: Vec<Vec<u8>> = (&[[4, 2].to_vec(), [3, 1].to_vec()]).to_vec();
+        assert_eq!(result, expected);
+    }
+    #[test]
+    fn heights_test() {
+        let piles = &[[4, 5, 2].to_vec(), [6, 1].to_vec(), [7, 8, 9, 10].to_vec()];
+        assert_eq!(max_heights(piles), 4);
     }
 }
