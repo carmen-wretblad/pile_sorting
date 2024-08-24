@@ -1,4 +1,6 @@
 use crate::{board::Board, BoardRep};
+use std::cmp::Ord;
+use std::cmp::Ordering::{Equal, Greater, Less};
 use std::{u8, usize};
 
 trait Sortedness {
@@ -15,10 +17,53 @@ trait Sortedness {
     fn has_solution_pile(&self) -> bool;
     fn next_card(&self) -> u8;
     fn depth_of_card(&self, card: u8) -> Option<usize>;
-    fn depth_of_next_card(&self) -> Option<usize> {
+    fn depth_of_next_card(&self) -> usize {
         self.depth_of_card(self.next_card())
+            .expect("next card must always have a position")
+    }
+    fn order_object(&self) -> OrderObject {
+        OrderObject {
+            next_card: self.next_card(),
+            depth_of_next_card: self.depth_of_next_card(),
+            sortedness: self.sortedness(),
+        }
     }
 }
+//#[derive(PartialEq, Eq, PartialOrd, Ord)]
+struct OrderObject {
+    next_card: u8,
+    depth_of_next_card: usize,
+    sortedness: usize,
+}
+impl PartialEq for OrderObject {
+    fn eq(&self, other: &Self) -> bool {
+        self.next_card == other.next_card
+            && self.depth_of_next_card == other.depth_of_next_card
+            && self.sortedness == other.sortedness
+    }
+}
+impl Eq for OrderObject {}
+impl PartialOrd for OrderObject {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        match self.next_card.cmp(&other.next_card) {
+            Greater => return Some(Greater),
+            Less => return Some(Less),
+            Equal => (),
+        }
+        match self.depth_of_next_card.cmp(&other.depth_of_next_card) {
+            Greater => return Some(Greater),
+            Less => return Some(Less),
+            Equal => (),
+        }
+        Some(self.sortedness.cmp(&other.sortedness))
+    }
+}
+impl Ord for OrderObject {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.partial_cmp(other).expect("Ordering is total")
+    }
+}
+
 type Piles = Vec<Vec<u8>>;
 
 impl Sortedness for Piles {
