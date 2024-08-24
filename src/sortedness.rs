@@ -1,9 +1,9 @@
 use crate::{board::Board, BoardRep};
 use std::cmp::Ord;
-use std::cmp::Ordering::{Equal, Greater, Less};
+use std::fmt::Debug;
 use std::{u8, usize};
 
-trait Sortedness {
+pub trait Sortedness: Debug {
     fn heights(&self) -> Vec<usize>;
     fn max_height(&self) -> usize {
         *self
@@ -18,8 +18,16 @@ trait Sortedness {
     fn next_card(&self) -> u8;
     fn depth_of_card(&self, card: u8) -> Option<usize>;
     fn depth_of_next_card(&self) -> usize {
-        self.depth_of_card(self.next_card())
-            .expect("next card must always have a position")
+        self.depth_of_card(self.next_card()).expect(
+            format!(
+                "next card must always have a position \n 
+                    next card should be: {}
+                    given the piles {:?}",
+                self.next_card(),
+                &self,
+            )
+            .as_str(),
+        )
     }
     fn order_object(&self) -> OrderObject {
         OrderObject {
@@ -29,8 +37,8 @@ trait Sortedness {
         }
     }
 }
-#[derive(PartialEq, Eq, PartialOrd, Ord)]
-struct OrderObject {
+#[derive(PartialEq, Eq, PartialOrd, Ord, Debug)]
+pub struct OrderObject {
     next_card: u8,
     depth_of_next_card: usize,
     sortedness: usize,
@@ -67,9 +75,12 @@ impl Sortedness for Piles {
         nbr_cards - 2
     }
     fn depth_of_card(&self, card: u8) -> Option<usize> {
+        if card == 0 {
+            return Some(0);
+        }
         for pile in self {
             match pile.iter().position(|x| *x == card) {
-                Some(position) => return Some(pile.len() - (position + 1)),
+                Some(position) => return Some(pile.len() - (position) - 1),
                 None => (),
             }
         }
@@ -182,6 +193,25 @@ mod tests {
     fn nbr_cards_test() {
         let piles: Piles = ([[4, 5, 2].to_vec(), [6, 1].to_vec(), [7, 8, 9, 10].to_vec()]).to_vec();
         assert_eq!(piles.nbr_cards(), 9);
+        let piles: Vec<Vec<u8>> = [
+            [1, 9, 5, 6, 3, 8, 4, 7, 12, 2, 16].to_vec(),
+            [10, 15, 14, 13].to_vec(),
+            [11].to_vec(),
+            [].to_vec(),
+            [].to_vec(),
+        ]
+        .to_vec();
+        assert_eq!(piles.nbr_cards(), 16);
+        let vec = [1, 9, 5, 6, 3, 8, 4, 7, 12, 2, 16, 11, 13, 14, 15, 10].to_vec();
+        let mut board = Board::new(&vec, 5);
+        board.perform_move([0, 1], "nbr_card_test"); //10
+        board.perform_move([1, 0], "nbr_card_test"); //15
+        board.perform_move([1, 0], "nbr_card_test"); //14
+        board.perform_move([1, 0], "nbr_card_test"); //13
+        board.perform_move([1, 2], "nbr_card_test"); //11
+        assert_eq!(board.nbr_cards, 16);
+        assert_eq!(board.nbr_cards(), 16);
+        assert_eq!(board.relative_piles().nbr_cards(), 16);
     }
     #[test]
     fn has_solution_pile_test() {

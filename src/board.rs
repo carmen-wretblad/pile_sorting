@@ -169,9 +169,8 @@ impl Board {
             pile_ids.push(i);
         }
         pile_ids.iter_mut().for_each(|x| *x = self.rel_to_abs(*x));
-        let mut pile_in_rel_order = Vec::new();
         for i in pile_ids {
-            pile_in_rel_order.push(start);
+            piles_in_rel_order.push(start);
             piles_in_rel_order.append(&mut self.piles[i].clone());
             piles_in_rel_order.push(end);
         }

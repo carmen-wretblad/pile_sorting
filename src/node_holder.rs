@@ -1,6 +1,8 @@
 #[allow(unused, dead_code)]
 use crate::board::Board;
 use crate::node_content::NodeContent;
+use crate::sortedness;
+use crate::sortedness::Sortedness;
 use crate::BoardRep;
 use std::collections::HashMap;
 use std::collections::HashSet;
@@ -100,15 +102,14 @@ impl NodeHolder {
         println!("before removing: {}", self.future_generation.len());
         self.future_generation
             .retain(|x| x.0.nbr_cards == nbr_cards);
-        println!("after removing:  {}", self.future_generation.len());
-        /*
-        if self.future_generation.len() < 100 {
-            unimplemented!();
-        } else if self.future_generation.len() < 500 {
-            unimplemented!();
+
+        if self.future_generation.len() < 2000 {
         } else {
-            unimplemented!();
-        }*/
+            self.future_generation
+                .sort_by(|a, b| a.0.order_object().cmp(&b.0.order_object()));
+            self.future_generation.drain(2000..);
+        }
+        println!("after removing:  {}", self.future_generation.len());
     }
     /*fn prune_new_generation(&mut self) {
         println!("before removing new: {}", self.future_generation.len());

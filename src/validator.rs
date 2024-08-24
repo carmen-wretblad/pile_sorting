@@ -1,8 +1,9 @@
 use crate::board::*;
+use crate::sortedness::Sortedness;
 use crate::RelMove;
 pub type RelSolution = Vec<RelMove>;
 use std::collections::HashSet;
-const VALIDATOR_SHOULD_PRINT: bool = false;
+const VALIDATOR_SHOULD_PRINT: bool = true;
 
 pub fn get_solution(set: &HashSet<Board>, starting_board: &Board) -> RelSolution {
     let nbr_piles = starting_board.piles.len();
@@ -48,6 +49,7 @@ pub fn confirm_solution(solution: &RelSolution, starting_board: &Board) -> bool 
         board.perform_move(rel_move, "confirming_solution");
         if VALIDATOR_SHOULD_PRINT {
             println!("{}", &board);
+            println!("ordering {:?}", board.order_object());
         }
     }
     board.solved()
