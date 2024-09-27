@@ -237,8 +237,6 @@ impl Board {
     }
     /// Performs a move. Move instructions are "relative".
     pub fn perform_move_unchecked(&mut self, move_command: RelMove) {
-        // seperate into move and place logic?
-
         let from_rel = move_command[0];
         let to_rel = move_command[1];
         let from_abs = self.rel_to_abs(from_rel);
@@ -247,7 +245,6 @@ impl Board {
             .last()
             .expect("Should never issue command to take from empty pile");
         let moved_higest_card = usize::from(card) == self.nbr_cards;
-        let moved_on_top_of_highest_card = to_abs == self.pos_of_highest_card;
         let card_diff = self.nbr_cards - usize::from(card);
         let should_go_on_top =
             (usize::wrapping_sub(self.piles[self.pos_of_highest_card].len(), card_diff)) == 0;
@@ -257,15 +254,10 @@ impl Board {
             && usize::from(card) == self.nbr_cards - 2;
 
         self.last_move = Some([from_abs, to_abs]);
-
         self.last_location_translator = Some(self.abs_to_rel_translator.clone());
         self.last_shrunk = shrink;
-        if moved_higest_card {
-            self.pos_of_highest_card = to_abs;
-            self.highest_card_is_on_bottom = self.piles[to_abs].is_empty();
-            self.has_solution_pile = self.piles[to_abs].is_empty();
-        }
-        if moved_on_top_of_highest_card {
+
+        if to_abs == self.pos_of_highest_card {
             if !should_go_on_top {
                 self.has_solution_pile = false;
             }
@@ -273,6 +265,11 @@ impl Board {
                 self.piles[to_abs].remove(0);
                 self.nbr_cards -= 1;
             }
+        }
+        if moved_higest_card {
+            self.pos_of_highest_card = to_abs;
+            self.highest_card_is_on_bottom = self.piles[to_abs].is_empty();
+            self.has_solution_pile = self.piles[to_abs].is_empty();
         }
         self.piles[from_abs].pop().unwrap();
         self.piles[to_abs].push(card);
