@@ -115,6 +115,7 @@ impl NodeHolder {
         println!("before removing: {}", self.future_generation.len());
         //self.future_generation
         //    .retain(|x| x.0.nbr_cards == nbr_cards);
+
         self.future_generation
             .retain(|x| x.0.theoretical_minimum() < self.past_minimum + 1);
 

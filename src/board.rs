@@ -27,6 +27,7 @@ pub struct Board {
     has_solution_pile: bool,
     pos_of_highest_card: usize,
     pub last_move: Option<AbsMove>,
+    pub relevant_last_moves: Vec<AbsMove>,
     pub last_location_translator: Option<Vec<usize>>,
     last_shrunk: bool,
 }
@@ -121,6 +122,7 @@ impl Board {
             has_solution_pile: false,
             pos_of_highest_card: 0,
             last_move: None,
+            relevant_last_moves: Vec::new(),
             last_location_translator: None,
             last_shrunk: false,
         };
@@ -236,6 +238,7 @@ impl Board {
         moves
     }
     fn unecessary(&self, move_command: &AbsMove) -> bool {
+        // self.relevant_last_moves.retain(|x| x[0] != move_command[1]);
         match self.last_move {
             Some(last_move) => last_move[1] == move_command[0],
             None => false,
@@ -279,6 +282,7 @@ impl Board {
             && usize::from(card) == self.nbr_cards - 2;
 
         self.last_move = Some([from_abs, to_abs]);
+
         self.last_location_translator = Some(self.abs_to_rel_translator.clone());
         self.last_shrunk = shrink;
         if moved_higest_card {
