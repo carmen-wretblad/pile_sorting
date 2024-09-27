@@ -82,9 +82,8 @@ impl Sortedness for Piles {
             return Some(0);
         }
         for pile in self {
-            match pile.iter().position(|x| *x == card) {
-                Some(position) => return Some(pile.len() - (position) - 1),
-                None => (),
+            if let Some(position) = pile.iter().position(|x| *x == card) {
+                return Some(pile.len() - (position) - 1);
             }
         }
         None

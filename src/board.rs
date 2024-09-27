@@ -181,8 +181,8 @@ impl Board {
 
     pub fn valid_moves_rel(&self) -> Vec<RelMove> {
         self.valid_moves_abs()
-            .into_iter()
-            .map(|x| self.abs_to_rel_move(x))
+            .iter()
+            .map(|x| self.abs_to_rel_move(*x))
             .collect()
     }
 
@@ -246,6 +246,7 @@ impl Board {
             .expect("Should never issue command to take from empty pile");
         let moved_higest_card = usize::from(card) == self.nbr_cards;
         let card_diff = self.nbr_cards - usize::from(card);
+
         let should_go_on_top =
             (usize::wrapping_sub(self.piles[self.pos_of_highest_card].len(), card_diff)) == 0;
         let shrink = self.piles[self.pos_of_highest_card].len() == 2
