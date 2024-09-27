@@ -46,7 +46,7 @@ pub fn confirm_solution(solution: &RelSolution, starting_board: &Board) -> bool 
     }
     let mut stepper = solution.len();
     for abs_move_command in solution {
-        let rel_move = board.abs_to_rel_move(*abs_move_command);
+        let rel_move = board.translator.into_rel_move(*abs_move_command);
         board.perform_move(rel_move, "confirming_solution");
         if VALIDATOR_SHOULD_PRINT {
             stepper -= 1;

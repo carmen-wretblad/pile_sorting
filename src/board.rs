@@ -5,6 +5,7 @@ use crate::BoardRep;
 // Consider tracking higest and lowest card for each pile
 // ######
 use crate::config::*;
+use crate::translator::Translator;
 use crate::vector_util;
 use crate::AbsMove;
 use crate::RelMove;
@@ -21,14 +22,14 @@ pub const SOLUTION_PILE: [u8; 2] = [2, 1];
 /// Piles are always sorted in order of the value of the bottom card, highest to lowest.
 pub struct Board {
     pub piles: Vec<Vec<u8>>,
-    pub abs_to_rel_translator: Vec<usize>,
+    pub translator: Translator,
     pub nbr_cards: usize,
     highest_card_is_on_bottom: bool,
     has_solution_pile: bool,
     pos_of_highest_card: usize,
     pub last_move: Option<AbsMove>,
     pub relevant_last_moves: Vec<AbsMove>,
-    pub last_location_translator: Option<Vec<usize>>,
+    pub last_location_translator: Option<Translator>,
     last_shrunk: bool,
 }
 
@@ -49,7 +50,9 @@ impl PartialEq for Board {
 /// ```<[5][4][1 2 3]_ _>``` when printed in the terminal
 impl fmt::Display for Board {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let pile_ids: Vec<usize> = (0..self.piles.len()).map(|x| self.rel_to_abs(x)).collect();
+        let pile_ids: Vec<usize> = (0..self.piles.len())
+            .map(|x| self.translator.into_abs(x))
+            .collect();
         write!(f, "({})<", self.nbr_cards)?;
         for i in pile_ids {
             let mut pile = self.piles[i].clone();
@@ -90,7 +93,7 @@ impl Board {
         assert!(vector_util::correct_sequence(pile));
 
         let mut new_piles = Vec::new();
-        let new_position_translator = (0..nbr_piles).collect();
+        let new_position_translator: Vec<_> = (0..nbr_piles).collect();
         let mut new_nbr_cards = pile.len();
         let mut new_highest_card_is_on_bottom = false;
 
@@ -114,7 +117,7 @@ impl Board {
         }
         let mut board = Board {
             piles: new_piles,
-            abs_to_rel_translator: new_position_translator,
+            translator: Translator::new(nbr_piles),
             nbr_cards: new_nbr_cards,
             highest_card_is_on_bottom: new_highest_card_is_on_bottom,
             has_solution_pile: false,
@@ -124,7 +127,6 @@ impl Board {
             last_location_translator: None,
             last_shrunk: false,
         };
-        board.update_indexes();
         board
     }
     pub fn new_solved_board(nbr_piles: usize) -> Board {
@@ -168,21 +170,13 @@ impl Board {
     }
 
     pub fn relative_piles(&self) -> BoardRep {
-        let start: u8 = 200;
-        let end: u8 = 222;
-        let mut piles_in_rel_order = Vec::new();
-        for i in 0..self.piles.len() {
-            piles_in_rel_order.push(start);
-            piles_in_rel_order.append(&mut self.piles[self.rel_to_abs(i)].clone());
-            piles_in_rel_order.push(end);
-        }
-        piles_in_rel_order
+        self.translator.relative_piles(&self.piles)
     }
 
     pub fn valid_moves_rel(&self) -> Vec<RelMove> {
         self.valid_moves_abs()
             .iter()
-            .map(|x| self.abs_to_rel_move(*x))
+            .map(|x| self.translator.into_rel_move(*x))
             .collect()
     }
 
@@ -200,7 +194,7 @@ impl Board {
                     .is_some_and(|x| usize::from(*x) == next_card_needed)
                 {
                     let move_command = [i, self.pos_of_highest_card];
-                    return vec![self.abs_to_rel_move(move_command)];
+                    return vec![self.translator.into_rel_move(move_command)];
                 }
                 moves.retain(|x| !(x[0] == i && x[1] == self.pos_of_highest_card));
             }
@@ -209,7 +203,9 @@ impl Board {
             moves.retain(|x| x[1] != self.pos_of_highest_card);
         }
         moves.retain(|x| !self.unecessary(x));
-        moves.iter_mut().for_each(|x| *x = self.abs_to_rel_move(*x));
+        moves
+            .iter_mut()
+            .for_each(|x| *x = self.translator.into_rel_move(*x));
         moves
     }
     pub fn unconfirmed_validity_moves_rel(&self) -> Vec<RelMove> {
@@ -239,8 +235,8 @@ impl Board {
     pub fn perform_move_unchecked(&mut self, move_command: RelMove) {
         let from_rel = move_command[0];
         let to_rel = move_command[1];
-        let from_abs = self.rel_to_abs(from_rel);
-        let to_abs = self.rel_to_abs(to_rel);
+        let from_abs = self.translator.into_abs(from_rel);
+        let to_abs = self.translator.into_abs(to_rel);
         let card = *self.piles[from_abs]
             .last()
             .expect("Should never issue command to take from empty pile");
@@ -255,7 +251,7 @@ impl Board {
             && usize::from(card) == self.nbr_cards - 2;
 
         self.last_move = Some([from_abs, to_abs]);
-        self.last_location_translator = Some(self.abs_to_rel_translator.clone());
+        self.last_location_translator = Some(self.translator.clone());
         self.last_shrunk = shrink;
 
         if to_abs == self.pos_of_highest_card {
@@ -274,51 +270,14 @@ impl Board {
         }
         self.piles[from_abs].pop().unwrap();
         self.piles[to_abs].push(card);
-        self.update_indexes();
+        self.translator.update_indexes(&self.piles);
     }
     /// A solved pile will be identical to a pile with the cards \[2,1\] in one pile and no other
     /// cards.
     pub fn solved(&self) -> bool {
         self.piles[self.pos_of_highest_card] == SOLUTION_PILE
     }
-    fn abs_to_rel(&self, abs_val: usize) -> usize {
-        self.abs_to_rel_translator[abs_val]
-    }
-    pub fn abs_to_rel_move(&self, abs_move: AbsMove) -> RelMove {
-        [self.abs_to_rel(abs_move[0]), self.abs_to_rel(abs_move[1])]
-    }
 
-    fn rel_to_abs(&self, rel_val: usize) -> usize {
-        self.abs_to_rel_translator
-            .iter()
-            .position(|x| *x == rel_val)
-            .expect("All values should be present")
-    }
-    pub fn rel_to_abs_move(&self, rel_move: RelMove) -> AbsMove {
-        [self.rel_to_abs(rel_move[0]), self.rel_to_abs(rel_move[1])]
-    }
-
-    fn update_indexes(&mut self) {
-        let mut non_empty_piles = Vec::<usize>::new();
-        let mut empty_piles = Vec::<usize>::new();
-        for (i, el) in self.piles.iter().enumerate() {
-            match el.is_empty() {
-                true => empty_piles.push(i),
-                false => non_empty_piles.push(i),
-            }
-        }
-        non_empty_piles.sort_by(|a, b| self.piles[*b][0].cmp(&self.piles[*a][0]));
-        let mut counter = 0;
-        for pile in &non_empty_piles {
-            self.abs_to_rel_translator[*pile] = counter;
-            counter += 1;
-        }
-        for pile in empty_piles {
-            self.abs_to_rel_translator[pile] = counter;
-            counter += 1;
-        }
-        // order rel based on highest card
-    }
     pub fn get_reverted(&self) -> Board {
         match self.last_move {
             None => panic!(),
@@ -330,7 +289,7 @@ impl Board {
                     board.piles[self.pos_of_highest_card]
                         .insert(0, u8::try_from(self.nbr_cards + 1).unwrap());
                 }
-                board.perform_move_unchecked(self.abs_to_rel_move(the_move));
+                board.perform_move_unchecked(self.translator.into_rel_move(the_move));
                 board.last_move = None;
                 board
             }
