@@ -56,7 +56,6 @@ impl fmt::Display for Board {
             let mut pile = self.piles[i].clone();
             if !pile.is_empty() {
                 write!(f, "[")?;
-
                 let last = pile.pop();
                 for card in pile.iter() {
                     write!(f, "{} ", card)?;
@@ -151,14 +150,12 @@ impl Board {
                 false => non_empty_piles.push(i),
             }
         }
-        //let valid_to = self.abs_to_rel_translator.clone();
-        let valid_from = non_empty_piles.clone();
         let mut valid_to = non_empty_piles.clone();
         if let Some(pile) = empty_piles.first() {
             valid_to.push(*pile)
         }
         let mut valid_moves = Vec::<AbsMove>::new();
-        for from in &valid_from {
+        for from in &non_empty_piles {
             for to in &valid_to {
                 valid_moves.push([*from, *to])
             }
@@ -175,14 +172,9 @@ impl Board {
         let start: u8 = 200;
         let end: u8 = 222;
         let mut piles_in_rel_order = Vec::new();
-        let mut pile_ids: Vec<usize> = Vec::new();
         for i in 0..self.piles.len() {
-            pile_ids.push(i);
-        }
-        pile_ids.iter_mut().for_each(|x| *x = self.rel_to_abs(*x));
-        for i in pile_ids {
             piles_in_rel_order.push(start);
-            piles_in_rel_order.append(&mut self.piles[i].clone());
+            piles_in_rel_order.append(&mut self.piles[self.rel_to_abs(i)].clone());
             piles_in_rel_order.push(end);
         }
         piles_in_rel_order
@@ -202,13 +194,12 @@ impl Board {
             return vec![];
         }
         let mut moves = self.valid_moves_abs();
-        moves.retain(|x| x[0] != x[1]);
-        moves.retain(|x| !self.unecessary(x));
-
         if self.has_solution_pile {
             for (i, pile) in self.piles.iter().enumerate() {
-                let last = pile.last();
-                if last.is_some_and(|x| usize::from(*x) == next_card_needed) {
+                if pile
+                    .last()
+                    .is_some_and(|x| usize::from(*x) == next_card_needed)
+                {
                     let move_command = [i, self.pos_of_highest_card];
                     return vec![self.abs_to_rel_move(move_command)];
                 }
@@ -238,7 +229,6 @@ impl Board {
         moves
     }
     fn unecessary(&self, move_command: &AbsMove) -> bool {
-        // self.relevant_last_moves.retain(|x| x[0] != move_command[1]);
         match self.last_move {
             Some(last_move) => last_move[1] == move_command[0],
             None => false,
