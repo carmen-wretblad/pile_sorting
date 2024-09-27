@@ -201,7 +201,7 @@ impl Board {
         }
         let mut moves = self.valid_moves_abs();
         moves.retain(|x| x[0] != x[1]);
-        moves.retain(|x| !self.is_last_move(x));
+        moves.retain(|x| !self.unecessary(x));
 
         if self.has_solution_pile {
             for (i, pile) in self.piles.iter().enumerate() {
@@ -216,7 +216,7 @@ impl Board {
         } else {
             moves.retain(|x| x[1] != self.pos_of_highest_card);
         }
-        moves.retain(|x| !self.is_last_move(x));
+        moves.retain(|x| !self.unecessary(x));
         moves.iter_mut().for_each(|x| *x = self.abs_to_rel_move(*x));
         moves
     }
@@ -235,9 +235,9 @@ impl Board {
         } */
         moves
     }
-    fn is_last_move(&self, move_command: &AbsMove) -> bool {
+    fn unecessary(&self, move_command: &AbsMove) -> bool {
         match self.last_move {
-            Some(last_move) => last_move[1] == move_command[0] && last_move[0] == move_command[1],
+            Some(last_move) => last_move[1] == move_command[0],
             None => false,
         }
     }
