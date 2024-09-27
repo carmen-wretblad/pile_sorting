@@ -8,5 +8,6 @@ pub mod config;
 pub mod node_content;
 pub mod node_holder;
 pub mod sortedness;
+pub mod translator;
 pub mod validator;
 pub mod vector_util;
