@@ -93,7 +93,6 @@ impl Board {
         assert!(vector_util::correct_sequence(pile));
 
         let mut new_piles = Vec::new();
-        let new_position_translator: Vec<_> = (0..nbr_piles).collect();
         let mut new_nbr_cards = pile.len();
         let mut new_highest_card_is_on_bottom = false;
 
@@ -115,7 +114,7 @@ impl Board {
                 }
             }
         }
-        let mut board = Board {
+        let board = Board {
             piles: new_piles,
             translator: Translator::new(nbr_piles),
             nbr_cards: new_nbr_cards,
@@ -174,10 +173,7 @@ impl Board {
     }
 
     pub fn valid_moves_rel(&self) -> Vec<RelMove> {
-        self.valid_moves_abs()
-            .iter()
-            .map(|x| self.translator.into_rel_move(*x))
-            .collect()
+        self.translator.into_rel_vector(&self.valid_moves_abs())
     }
 
     /// Returns all moves(relative) that may lead to a better solution.
