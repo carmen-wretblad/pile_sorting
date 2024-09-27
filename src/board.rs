@@ -35,8 +35,7 @@ pub struct Board {
 /// Hashing is based on relative pile positions
 impl Hash for Board {
     fn hash<H: Hasher>(&self, state: &mut H) {
-        let big_pile = self.relative_piles();
-        big_pile.hash(state);
+        self.relative_piles().hash(state);
     }
 }
 impl Eq for Board {}
@@ -189,12 +188,12 @@ impl Board {
 
     /// Returns all moves(relative) that may lead to a better solution.
     pub fn good_moves_rel(&self) -> Vec<RelMove> {
-        let next_card_needed = self.nbr_cards - self.piles[self.pos_of_highest_card].len();
         if self.solved() {
             return vec![];
         }
         let mut moves = self.valid_moves_abs();
         if self.has_solution_pile {
+            let next_card_needed = self.nbr_cards - self.piles[self.pos_of_highest_card].len();
             for (i, pile) in self.piles.iter().enumerate() {
                 if pile
                     .last()
@@ -214,19 +213,7 @@ impl Board {
         moves
     }
     pub fn unconfirmed_validity_moves_rel(&self) -> Vec<RelMove> {
-        let moves = self.good_moves_rel();
-
-        /* if !self.has_solution_pile {  // <-- Doesn't work perfectly
-            for (i, pile) in self.piles.iter().enumerate() {
-                if pile.is_empty()
-                    && usize::from(*self.piles[self.pos_of_highest_card].last().unwrap())
-                        == self.nbr_cards
-                {
-                    return vec![self.abs_to_rel_move([self.pos_of_highest_card, i])];
-                }
-            }
-        } */
-        moves
+        self.good_moves_rel()
     }
     fn unecessary(&self, move_command: &AbsMove) -> bool {
         match self.last_move {
@@ -261,8 +248,6 @@ impl Board {
             .expect("Should never issue command to take from empty pile");
         let moved_higest_card = usize::from(card) == self.nbr_cards;
         let moved_on_top_of_highest_card = to_abs == self.pos_of_highest_card;
-        let had_solution_pile = self.has_solution_pile;
-
         let card_diff = self.nbr_cards - usize::from(card);
         let should_go_on_top =
             (usize::wrapping_sub(self.piles[self.pos_of_highest_card].len(), card_diff)) == 0;
@@ -277,22 +262,16 @@ impl Board {
         self.last_shrunk = shrink;
         if moved_higest_card {
             self.pos_of_highest_card = to_abs;
-            if self.piles[to_abs].is_empty() {
-                self.highest_card_is_on_bottom = true;
-                self.has_solution_pile = true;
-            } else {
-                self.highest_card_is_on_bottom = false;
-                self.has_solution_pile = false;
-            }
+            self.highest_card_is_on_bottom = self.piles[to_abs].is_empty();
+            self.has_solution_pile = self.piles[to_abs].is_empty();
         }
         if moved_on_top_of_highest_card {
-            if had_solution_pile && should_go_on_top {
-                if shrink {
-                    self.piles[to_abs].remove(0);
-                    self.nbr_cards -= 1;
-                }
-            } else {
+            if !should_go_on_top {
                 self.has_solution_pile = false;
+            }
+            if shrink {
+                self.piles[to_abs].remove(0);
+                self.nbr_cards -= 1;
             }
         }
         self.piles[from_abs].pop().unwrap();
