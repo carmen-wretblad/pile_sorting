@@ -27,7 +27,6 @@ trait BlockerMatrixUtil {
     fn set_from_to(&mut self, from: usize, to: usize, status: bool);
     fn set_from(&mut self, from: usize, status: bool);
     fn set_to(&mut self, to: usize, status: bool);
-    fn to_into_other_to(&mut self, old_to: usize, new_to: usize);
 }
 
 impl HistoryTrackerImpl {
@@ -85,11 +84,6 @@ impl BlockerMatrixUtil for HistoryTrackerImpl {
     fn set_to(&mut self, to: usize, status: bool) {
         for i in 0..self.nbr_piles {
             self.blocker_matrix[i][to] = status;
-        }
-    }
-    fn to_into_other_to(&mut self, old_to: usize, new_to: usize) {
-        for i in 0..self.nbr_piles {
-            self.blocker_matrix[i][old_to] = self.blocker_matrix[i][new_to]
         }
     }
 }

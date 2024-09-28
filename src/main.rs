@@ -12,7 +12,7 @@ fn main() {
     run_board();
 }
 fn run_board() {
-    let vec = [1, 8, 4, 9, 7, 2, 3, 6, 5];
+    let vec = [1, 8, 4, 7, 2, 3, 6, 5];
     let board = Board::new(&vec, 4);
     let mut bfs = BFS::new(&board, sorting::bfs::MoveChoice::Good);
     println!("{}", bfs.solve().unwrap().len());
