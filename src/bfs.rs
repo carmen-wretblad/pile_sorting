@@ -12,7 +12,6 @@ use std::collections::HashSet;
 pub enum MoveChoice {
     Valid,
     Good,
-    Unconfirmed,
 }
 
 pub struct BFS {
@@ -46,7 +45,6 @@ impl BFS {
         match &self.strategy {
             MoveChoice::Valid => board.valid_moves_rel(),
             MoveChoice::Good => board.good_moves_rel(),
-            MoveChoice::Unconfirmed => board.unconfirmed_validity_moves_rel(),
         }
     }
     pub fn internal_step(&mut self) -> bool {
@@ -107,12 +105,8 @@ impl BFS {
 mod test {
     // main.rs
 
-    use crate::vector_util;
-    enum CompareTo {
-        Valid,
-        Unconfirmed,
-    }
     use super::*;
+    use crate::vector_util;
     #[test]
     fn compare_good_and_valid() {
         let mut all_board: Vec<Board> = Vec::new();
@@ -121,73 +115,28 @@ mod test {
         }
         all_board.push(Board::new(&vec![2, 5, 3, 4, 6, 1, 7], 4));
         for board in all_board {
-            best_solution_not_exluded(&board, CompareTo::Valid);
-        }
-    }
-    #[test]
-    fn compare_good_and_unconfirmed() {
-        let mut all_board: Vec<Board> = Vec::new();
-        for pile in vector_util::all_sequences(5) {
-            all_board.push(Board::new(&pile, 4));
-        }
-        for pile in vector_util::all_sequences(5) {
-            all_board.push(Board::new(&pile, 3));
-        }
-
-        all_board.push(Board::new(&vec![2, 7, 6, 5, 4, 1, 3], 3));
-        all_board.push(Board::new(&vec![2, 1, 3, 4, 5, 7, 6], 3));
-        all_board.push(Board::new(&vec![6, 5, 3, 4, 2, 1, 7], 3));
-
-        all_board.push(Board::new(&vec![2, 7, 6, 5, 4, 1, 3], 4));
-        all_board.push(Board::new(&vec![2, 1, 3, 4, 5, 7, 6], 4));
-        all_board.push(Board::new(&vec![6, 5, 3, 4, 2, 1, 7], 4));
-
-        all_board.push(Board::new(&vec![2, 7, 6, 5, 4, 1, 3], 5));
-        all_board.push(Board::new(&vec![2, 1, 3, 4, 5, 7, 6], 5));
-        all_board.push(Board::new(&vec![6, 5, 3, 4, 1, 2, 7], 5));
-
-        all_board.push(Board::new(&vec![2, 7, 6, 5, 4, 1, 3, 8], 5));
-
-        for board in all_board {
-            best_solution_not_exluded(&board, CompareTo::Unconfirmed);
+            best_solution_not_exluded(&board);
         }
     }
 
-    fn best_solution_not_exluded(board: &Board, compare_to: CompareTo) {
+    fn best_solution_not_exluded(board: &Board) {
         let mut bfs_good = BFS::new(&board, MoveChoice::Good);
         let good_len = bfs_good
             .solve()
             .expect("There should always be a good solution")
             .len();
 
-        match compare_to {
-            CompareTo::Valid => {
-                let mut bfs_valid = BFS::new(&board, MoveChoice::Valid);
-                let valid_len = bfs_valid
-                    .solve()
-                    .expect("There is always a valid solution")
-                    .len();
-                assert!(
-                    valid_len == good_len,
-                    "valid: {}, good: {}",
-                    valid_len,
-                    good_len,
-                );
-            }
-            CompareTo::Unconfirmed => {
-                let mut bfs_unconfirmed = BFS::new(&board, MoveChoice::Unconfirmed);
-                let unconfirmed_len = bfs_unconfirmed
-                    .solve()
-                    .expect("There is always a solution")
-                    .len();
-                assert!(
-                    unconfirmed_len == good_len,
-                    "uconfirmed: {}, good: {}",
-                    unconfirmed_len,
-                    good_len,
-                )
-            }
-        }
+        let mut bfs_valid = BFS::new(&board, MoveChoice::Valid);
+        let valid_len = bfs_valid
+            .solve()
+            .expect("There is always a valid solution")
+            .len();
+        assert!(
+            valid_len == good_len,
+            "valid: {}, good: {}",
+            valid_len,
+            good_len,
+        );
     }
     #[test]
     fn valid_bfs_works() {

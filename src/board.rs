@@ -82,7 +82,12 @@ impl fmt::Display for Board {
         )
     }
 }
-
+fn cartesian_product(nbr: usize) -> Vec<AbsMove> {
+    let x = 0..nbr;
+    x.clone()
+        .flat_map(|y| x.clone().map(move |x| [x.clone(), y.clone()]))
+        .collect()
+}
 impl Board {
     /// Creates a new Board, with all cards placed in the 0th pile.
     pub fn new(pile: &[u8], nbr_piles: usize) -> Board {
@@ -140,25 +145,17 @@ impl Board {
     /// Gives all moves(absolute) that may be performed that yields a valid state,
     /// performing any other move will cause a panic.
     fn valid_moves_abs(&self) -> Vec<RelMove> {
-        let mut non_empty_piles = Vec::<usize>::new();
         let mut empty_piles = Vec::<usize>::new();
 
         for (i, el) in self.piles.iter().enumerate() {
-            match el.is_empty() {
-                true => empty_piles.push(i),
-                false => non_empty_piles.push(i),
+            if el.is_empty() {
+                empty_piles.push(i)
             }
         }
-        let mut valid_to = non_empty_piles.clone();
-        if let Some(pile) = empty_piles.first() {
-            valid_to.push(*pile)
-        }
-        let mut valid_moves = Vec::<AbsMove>::new();
-        for from in &non_empty_piles {
-            for to in &valid_to {
-                valid_moves.push([*from, *to])
-            }
-        }
+        let mut valid_moves = cartesian_product(self.piles.len());
+
+        valid_moves.retain(|x| !empty_piles.contains(&x[1]) || empty_piles[0] == x[1]);
+        valid_moves.retain(|x| !empty_piles.contains(&x[0]));
         valid_moves.retain(|x| x[0] != x[1]);
 
         // doesn't take from empty pile
@@ -197,16 +194,14 @@ impl Board {
         } else {
             moves.retain(|x| x[1] != self.pos_of_highest_card);
         }
-        moves.retain(|x| !self.unecessary(x));
+        moves.retain(|x| !self.unnecessary(x));
         moves
             .iter_mut()
             .for_each(|x| *x = self.translator.into_rel_move(*x));
         moves
     }
-    pub fn unconfirmed_validity_moves_rel(&self) -> Vec<RelMove> {
-        self.good_moves_rel()
-    }
-    fn unecessary(&self, move_command: &AbsMove) -> bool {
+
+    fn unnecessary(&self, move_command: &AbsMove) -> bool {
         self.history_tracker.unnecessary(*move_command)
     }
     pub fn perform_move(&mut self, move_command: RelMove, caller_name: &str) {
@@ -280,7 +275,6 @@ impl Board {
                         .insert(0, u8::try_from(self.nbr_cards + 1).unwrap());
                 }
                 board.perform_move_unchecked(self.translator.into_rel_move(the_move));
-                //board.last_move = None;
                 board
             }
         }
