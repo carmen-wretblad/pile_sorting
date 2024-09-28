@@ -6,14 +6,14 @@ use sorting::bfs;
 use sorting::node_holder::NodeHolder;
 use sorting::vector_util::all_sequences;
 fn main() {
-    stats();
-    test_node_holder();
-    test_node_holder_expensive();
+    //stats();
+    //test_node_holder();
+    //test_node_holder_expensive();
     run_board();
 }
 fn run_board() {
-    let vec = [1, 8, 4, 7, 2, 3, 6, 5];
-    let board = Board::new(&vec, 3);
+    let vec = [1, 8, 4, 9, 7, 2, 3, 6, 5];
+    let board = Board::new(&vec, 4);
     let mut bfs = BFS::new(&board, sorting::bfs::MoveChoice::Good);
     println!("{}", bfs.solve().unwrap().len());
     println!("bfs board counter {} ", bfs.board_counter);

@@ -57,10 +57,8 @@ impl HistoryTracker for HistoryTrackerImpl {
             .collect()
     }
     fn update(&mut self, move_command: AbsMove) {
-        for i in 0..self.nbr_piles {
-            self.set_from(i, USABLE)
-        }
-        self.set_from_to(move_command[1], move_command[0], BLOCKED);
+        self.set_to(move_command[0], USABLE);
+        self.set_from(move_command[1], BLOCKED);
         self.last_move = Some(move_command);
     }
 }
