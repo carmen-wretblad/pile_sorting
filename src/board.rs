@@ -86,6 +86,7 @@ fn cartesian_product(nbr: usize) -> Vec<AbsMove> {
     let x = 0..nbr;
     x.clone()
         .flat_map(|y| x.clone().map(move |x| [x.clone(), y.clone()]))
+        .filter(|x| x[0] != x[1])
         .collect()
 }
 impl Board {
@@ -153,14 +154,8 @@ impl Board {
             }
         }
         let mut valid_moves = cartesian_product(self.piles.len());
-
         valid_moves.retain(|x| !empty_piles.contains(&x[1]) || empty_piles[0] == x[1]);
         valid_moves.retain(|x| !empty_piles.contains(&x[0]));
-        valid_moves.retain(|x| x[0] != x[1]);
-
-        // doesn't take from empty pile
-        // doesn't put in empty pile except first one
-        // doesn't take from one pile and put into same
         valid_moves
     }
 

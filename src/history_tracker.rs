@@ -2,6 +2,8 @@ use crate::translator::Translator;
 use crate::AbsMove;
 use std::usize;
 
+// IDEA: use a singular vec and translate the indicies instead
+
 const BLOCKED: bool = true;
 const USABLE: bool = false;
 
