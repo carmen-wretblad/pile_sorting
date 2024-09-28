@@ -1,18 +1,23 @@
-use std::usize;
-
 use crate::translator::Translator;
 use crate::AbsMove;
+use std::usize;
+
+const BLOCKED: bool = true;
+const USABLE: bool = false;
+
+#[derive(Debug, Clone)]
 pub struct HistoryTrackerImpl {
     nbr_piles: usize,
     last_move: Option<AbsMove>,
     blocker_matrix: Vec<Vec<bool>>,
 }
 
-trait Reverter {
+pub trait Reverter {
     fn revert(&self, piles: &Vec<&[u8]>, translator: Translator);
+    fn last_move(&self) -> Option<AbsMove>;
 }
 
-trait HistoryTracker {
+pub trait HistoryTracker {
     fn unnecessary(&self, move_command: AbsMove) -> bool;
     fn remove_unnecessary(&self, move_commands: Vec<AbsMove>) -> Vec<AbsMove>;
     fn update(&mut self, move_command: AbsMove);
@@ -26,18 +31,18 @@ trait BlockerMatrixUtil {
 }
 
 impl HistoryTrackerImpl {
-    fn new(nbr_piles: usize) -> Self {
+    pub fn new(nbr_piles: usize) -> Self {
+        let mut matrix = Vec::new();
+        for i in 0..nbr_piles {
+            matrix.push(Vec::new());
+            for _ in 0..nbr_piles {
+                matrix[i].push(USABLE);
+            }
+        }
         Self {
             nbr_piles,
             last_move: None,
-            blocker_matrix: Vec::new(),
-        }
-    }
-
-    fn unnecessary(&self, move_command: &AbsMove) -> bool {
-        match self.last_move {
-            Some(last_move) => last_move[1] == move_command[0],
-            None => false,
+            blocker_matrix: matrix,
         }
     }
 }
@@ -48,19 +53,23 @@ impl HistoryTracker for HistoryTrackerImpl {
     fn remove_unnecessary(&self, move_commands: Vec<AbsMove>) -> Vec<AbsMove> {
         move_commands
             .into_iter()
-            .filter(|x| !self.unnecessary(x))
+            .filter(|x| !self.unnecessary(*x))
             .collect()
     }
     fn update(&mut self, move_command: AbsMove) {
         for i in 0..self.nbr_piles {
-            self.set_from(i, true)
+            self.set_from(i, USABLE)
         }
-        self.set_from_to(move_command[1], move_command[0], false);
+        self.set_from_to(move_command[1], move_command[0], BLOCKED);
+        self.last_move = Some(move_command);
     }
 }
 impl Reverter for HistoryTrackerImpl {
     fn revert(&self, piles: &Vec<&[u8]>, translator: Translator) {
         unimplemented!();
+    }
+    fn last_move(&self) -> Option<AbsMove> {
+        self.last_move
     }
 }
 impl BlockerMatrixUtil for HistoryTrackerImpl {

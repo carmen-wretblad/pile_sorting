@@ -1,3 +1,6 @@
+use crate::history_tracker::HistoryTracker;
+use crate::history_tracker::HistoryTrackerImpl;
+use crate::history_tracker::Reverter;
 use crate::sortedness::Sortedness;
 use crate::BoardRep;
 //  ##### TODO #######
@@ -27,8 +30,7 @@ pub struct Board {
     highest_card_is_on_bottom: bool,
     has_solution_pile: bool,
     pos_of_highest_card: usize,
-    pub last_move: Option<AbsMove>,
-    pub relevant_last_moves: Vec<AbsMove>,
+    pub history_tracker: HistoryTrackerImpl,
     last_shrunk: bool,
 }
 
@@ -120,8 +122,7 @@ impl Board {
             highest_card_is_on_bottom: new_highest_card_is_on_bottom,
             has_solution_pile: false,
             pos_of_highest_card: 0,
-            last_move: None,
-            relevant_last_moves: Vec::new(),
+            history_tracker: HistoryTrackerImpl::new(new_nbr_cards),
             last_shrunk: false,
         };
         board
@@ -206,10 +207,7 @@ impl Board {
         self.good_moves_rel()
     }
     fn unecessary(&self, move_command: &AbsMove) -> bool {
-        match self.last_move {
-            Some(last_move) => last_move[1] == move_command[0],
-            None => false,
-        }
+        self.history_tracker.unnecessary(*move_command)
     }
     pub fn perform_move(&mut self, move_command: RelMove, caller_name: &str) {
         assert!(
@@ -243,7 +241,7 @@ impl Board {
             && usize::from(self.piles[self.pos_of_highest_card][1]) == self.nbr_cards - 1
             && usize::from(card) == self.nbr_cards - 2;
 
-        self.last_move = Some(abs_command);
+        self.history_tracker.update(abs_command);
         self.last_shrunk = shrink;
 
         if to_abs == self.pos_of_highest_card {
@@ -271,7 +269,7 @@ impl Board {
     }
 
     pub fn get_reverted(&self) -> Board {
-        match self.last_move {
+        match self.history_tracker.last_move() {
             None => panic!(),
             Some(some_move) => {
                 let mut the_move = some_move;
@@ -282,7 +280,7 @@ impl Board {
                         .insert(0, u8::try_from(self.nbr_cards + 1).unwrap());
                 }
                 board.perform_move_unchecked(self.translator.into_rel_move(the_move));
-                board.last_move = None;
+                //board.last_move = None;
                 board
             }
         }

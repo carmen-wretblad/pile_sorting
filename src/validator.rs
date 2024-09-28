@@ -2,6 +2,7 @@ use crate::board::*;
 use crate::sortedness::Sortedness;
 use crate::RelMove;
 pub type RelSolution = Vec<RelMove>;
+use crate::history_tracker::*;
 use std::collections::HashSet;
 const VALIDATOR_SHOULD_PRINT: bool = true;
 
@@ -34,9 +35,11 @@ pub fn get_solution(set: &HashSet<Board>, starting_board: &Board) -> RelSolution
 
 pub fn board_seq_to_move(vec: &Vec<Board>) -> RelSolution {
     let mut vec = vec.to_owned();
-    assert!(vec[0].last_move.is_none());
+    assert!(vec[0].history_tracker.last_move().is_none());
     vec.remove(0);
-    vec.into_iter().map(|x| x.last_move.unwrap()).collect()
+    vec.into_iter()
+        .map(|x| x.history_tracker.last_move().unwrap())
+        .collect()
 }
 
 pub fn confirm_solution(solution: &RelSolution, starting_board: &Board) -> bool {
