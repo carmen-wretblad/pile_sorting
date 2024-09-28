@@ -5,6 +5,7 @@ pub type RelMove = [usize; 2];
 pub mod bfs;
 pub mod board;
 pub mod config;
+pub mod history_tracker;
 pub mod node_content;
 pub mod node_holder;
 pub mod sortedness;

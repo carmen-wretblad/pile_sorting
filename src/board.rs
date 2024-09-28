@@ -29,7 +29,6 @@ pub struct Board {
     pos_of_highest_card: usize,
     pub last_move: Option<AbsMove>,
     pub relevant_last_moves: Vec<AbsMove>,
-    pub last_location_translator: Option<Translator>,
     last_shrunk: bool,
 }
 
@@ -123,7 +122,6 @@ impl Board {
             pos_of_highest_card: 0,
             last_move: None,
             relevant_last_moves: Vec::new(),
-            last_location_translator: None,
             last_shrunk: false,
         };
         board
@@ -228,11 +226,10 @@ impl Board {
         self.perform_move_unchecked(move_command)
     }
     /// Performs a move. Move instructions are "relative".
-    pub fn perform_move_unchecked(&mut self, move_command: RelMove) {
-        let from_rel = move_command[0];
-        let to_rel = move_command[1];
-        let from_abs = self.translator.into_abs(from_rel);
-        let to_abs = self.translator.into_abs(to_rel);
+    pub fn perform_move_unchecked(&mut self, rel_command: RelMove) {
+        let abs_command = self.translator.into_abs_move(rel_command);
+        let from_abs = abs_command[0];
+        let to_abs = abs_command[1];
         let card = *self.piles[from_abs]
             .last()
             .expect("Should never issue command to take from empty pile");
@@ -246,8 +243,7 @@ impl Board {
             && usize::from(self.piles[self.pos_of_highest_card][1]) == self.nbr_cards - 1
             && usize::from(card) == self.nbr_cards - 2;
 
-        self.last_move = Some([from_abs, to_abs]);
-        self.last_location_translator = Some(self.translator.clone());
+        self.last_move = Some(abs_command);
         self.last_shrunk = shrink;
 
         if to_abs == self.pos_of_highest_card {

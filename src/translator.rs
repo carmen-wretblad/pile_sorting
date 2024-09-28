@@ -1,11 +1,13 @@
 #[derive(Clone, Debug)]
 pub struct Translator {
     abs_to_rel_translator: Vec<usize>,
+    last_location_translator: Option<Vec<usize>>,
 }
 impl Translator {
     pub fn new(nbr_piles: usize) -> Self {
         Self {
             abs_to_rel_translator: (0..nbr_piles).collect(),
+            last_location_translator: None,
         }
     }
     pub fn relative_piles(&self, piles: &[Vec<u8>]) -> Vec<u8> {
@@ -21,6 +23,8 @@ impl Translator {
     }
 
     pub fn update_indexes(&mut self, piles: &[Vec<u8>]) {
+        self.last_location_translator = Some(self.abs_to_rel_translator.clone());
+
         let mut non_empty_piles = Vec::<usize>::new();
         let mut empty_piles = Vec::<usize>::new();
         for (i, el) in piles.iter().enumerate() {
@@ -41,6 +45,7 @@ impl Translator {
         }
         // order rel based on highest card
     }
+
     pub fn into_abs(&self, rel: usize) -> usize {
         self.abs_to_rel_translator
             .iter()
@@ -73,5 +78,14 @@ impl Translator {
             .iter()
             .map(|abs_move| self.into_rel_move(*abs_move))
             .collect()
+    }
+    pub fn previous_translator(&self) -> Option<Self> {
+        if let Some(previous_translator) = &self.last_location_translator {
+            return Some(Self {
+                abs_to_rel_translator: previous_translator.to_vec(),
+                last_location_translator: None,
+            });
+        }
+        None
     }
 }
