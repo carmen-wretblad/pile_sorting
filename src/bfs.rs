@@ -1,6 +1,7 @@
 #![allow(unused, dead_code)]
 const SHOULD_PRINT_FOUND_BOARDS: bool = false;
 const SHOULD_PRINT_STEP_COUNTER: bool = false;
+use crate::RelSolution;
 use std::thread::current;
 use std::usize;
 

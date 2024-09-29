@@ -1,8 +1,8 @@
 use crate::board::*;
+use crate::history_tracker::*;
 use crate::sortedness::Sortedness;
 use crate::RelMove;
-pub type RelSolution = Vec<RelMove>;
-use crate::history_tracker::*;
+use crate::RelSolution;
 use std::collections::HashSet;
 const VALIDATOR_SHOULD_PRINT: bool = true;
 
