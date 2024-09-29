@@ -3,7 +3,7 @@ use crate::RelMove;
 use crate::RelSolution;
 
 pub trait GraphID {
-    fn id(self) -> BoardRep;
+    fn id(self) -> [BoardRep];
 }
 
 trait Graph {
