@@ -13,6 +13,7 @@ pub type RelSolution = Vec<RelMove>;
 pub type AbsSolution = Vec<AbsMove>;
 pub mod bfs;
 pub mod board;
+pub mod board_queue;
 pub mod config;
 pub mod graph;
 pub mod history_tracker;
