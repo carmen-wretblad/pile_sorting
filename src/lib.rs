@@ -16,6 +16,7 @@ pub mod board;
 pub mod board_queue;
 pub mod config;
 pub mod graph;
+pub mod graph_queue_solver;
 pub mod history_tracker;
 pub mod node_content;
 pub mod node_holder;
