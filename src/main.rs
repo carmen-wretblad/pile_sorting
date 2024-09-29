@@ -8,8 +8,8 @@ use sorting::vector_util::all_sequences;
 fn main() {
     //stats();
     //test_node_holder();
-    //test_node_holder_expensive();
-    run_board();
+    test_node_holder_expensive();
+    //run_board();
 }
 fn run_board() {
     let vec = [1, 8, 4, 7, 2, 3, 6, 5];

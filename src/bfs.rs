@@ -52,10 +52,7 @@ impl BFS {
             self.found_boards.insert(board.clone());
             for move_command in self.get_selected_moveset(board) {
                 let mut newboard = board.clone();
-                newboard.perform_move(
-                    move_command,
-                    &format!("bfs with srategy {:?}", self.strategy),
-                );
+                newboard.perform_move(move_command);
                 if newboard.solved() {
                     self.found_boards.insert(newboard.clone());
                     if SHOULD_PRINT_FOUND_BOARDS {
@@ -103,8 +100,6 @@ impl BFS {
 
 #[cfg(test)]
 mod test {
-    // main.rs
-
     use super::*;
     use crate::vector_util;
     #[test]
@@ -178,6 +173,5 @@ mod test {
         let board = Board::new(&pile, nbr_piles);
         let mut bfs = BFS::new(&board, strategy);
         let potential_solution = bfs.solve();
-        //assert!(bfs.solved_board.unwrap() == Board::new_solved_board(4))
     }
 }

@@ -1,6 +1,5 @@
 use crate::history_tracker::HistoryTracker;
 use crate::history_tracker::HistoryTrackerImpl;
-use crate::history_tracker::Reverter;
 use crate::sortedness::Sortedness;
 use crate::BoardRep;
 //  ##### TODO #######
@@ -27,10 +26,10 @@ pub struct Board {
     pub piles: Vec<Vec<u8>>,
     pub translator: Translator,
     pub nbr_cards: usize,
-    highest_card_is_on_bottom: bool,
+    highest_card_on_bottom: bool,
     has_solution_pile: bool,
-    pos_of_highest_card: usize,
-    pub history_tracker: HistoryTrackerImpl,
+    pos_highest_card: usize,
+    pub history: HistoryTrackerImpl,
     last_shrunk: bool,
 }
 
@@ -101,7 +100,7 @@ impl Board {
 
         let mut new_piles = Vec::new();
         let mut new_nbr_cards = pile.len();
-        let mut new_highest_card_is_on_bottom = false;
+        let mut new_highest_card_on_bottom = false;
 
         new_piles.push(pile.to_owned());
         for _ in 1..nbr_piles {
@@ -109,7 +108,7 @@ impl Board {
         }
 
         if pile.len() == pile[0].into() {
-            new_highest_card_is_on_bottom = true;
+            new_highest_card_on_bottom = true;
 
             while (new_piles[0][0] == new_piles[0][1] + 1)
                 && (new_piles[0][1] == new_piles[0][2] + 1)
@@ -125,10 +124,10 @@ impl Board {
             piles: new_piles,
             translator: Translator::new(nbr_piles),
             nbr_cards: new_nbr_cards,
-            highest_card_is_on_bottom: new_highest_card_is_on_bottom,
+            highest_card_on_bottom: new_highest_card_on_bottom,
             has_solution_pile: false,
-            pos_of_highest_card: 0,
-            history_tracker: HistoryTrackerImpl::new(new_nbr_cards),
+            pos_highest_card: 0,
+            history: HistoryTrackerImpl::new(new_nbr_cards),
             last_shrunk: false,
         };
         board
@@ -174,20 +173,20 @@ impl Board {
         }
         let mut moves = self.valid_moves_abs();
         if self.has_solution_pile {
-            let next_card_needed = self.nbr_cards - self.piles[self.pos_of_highest_card].len();
+            let next_card_needed = self.nbr_cards - self.piles[self.pos_highest_card].len();
             for (i, pile) in self.piles.iter().enumerate() {
                 if pile
                     .last()
                     .is_some_and(|x| usize::from(*x) == next_card_needed)
                 {
-                    let move_command = [i, self.pos_of_highest_card];
+                    let move_command = [i, self.pos_highest_card];
                     return vec![self.translator.into_rel_move(move_command)];
                 }
-                moves.retain(|x| !(x[0] == i && x[1] == self.pos_of_highest_card));
+                moves.retain(|x| !(x[0] == i && x[1] == self.pos_highest_card));
             }
-            moves.retain(|x| x[0] != self.pos_of_highest_card); // never remove card from solutionpile
+            moves.retain(|x| x[0] != self.pos_highest_card); // never remove card from solutionpile
         } else {
-            moves.retain(|x| x[1] != self.pos_of_highest_card);
+            moves.retain(|x| x[1] != self.pos_highest_card);
         }
         moves.retain(|x| !self.unnecessary(x));
         moves
@@ -197,44 +196,29 @@ impl Board {
     }
 
     fn unnecessary(&self, move_command: &AbsMove) -> bool {
-        self.history_tracker.unnecessary(*move_command)
+        self.history.unnecessary(*move_command)
     }
-    pub fn perform_move(&mut self, move_command: RelMove, caller_name: &str) {
-        assert!(
-            self.valid_moves_rel().contains(&move_command),
-            "move command {:?}, wasn't contained in the valid commands: {:?} (rel) || {:?} (abs), \n 
-            current board is {}, \n {:?} \n called is {}",
-            move_command,
-            self.valid_moves_rel(),
-            self.valid_moves_abs(),
-            &self,
-            &self,
-            caller_name
-        );
-        self.perform_move_unchecked(move_command)
-    }
+
     /// Performs a move. Move instructions are "relative".
-    pub fn perform_move_unchecked(&mut self, rel_command: RelMove) {
+    pub fn perform_move(&mut self, rel_command: RelMove) {
         let abs_command = self.translator.into_abs_move(rel_command);
         let from_abs = abs_command[0];
         let to_abs = abs_command[1];
         let card = *self.piles[from_abs]
             .last()
             .expect("Should never issue command to take from empty pile");
-        let moved_higest_card = usize::from(card) == self.nbr_cards;
+        let moved_highest_card = usize::from(card) == self.nbr_cards;
         let card_diff = self.nbr_cards - usize::from(card);
 
         let should_go_on_top =
-            (usize::wrapping_sub(self.piles[self.pos_of_highest_card].len(), card_diff)) == 0;
-        let shrink = self.piles[self.pos_of_highest_card].len() == 2
-            && usize::from(self.piles[self.pos_of_highest_card][0]) == self.nbr_cards
-            && usize::from(self.piles[self.pos_of_highest_card][1]) == self.nbr_cards - 1
+            (usize::wrapping_sub(self.piles[self.pos_highest_card].len(), card_diff)) == 0;
+        let shrink = self.piles[self.pos_highest_card].len() == 2
+            && usize::from(self.piles[self.pos_highest_card][0]) == self.nbr_cards
+            && usize::from(self.piles[self.pos_highest_card][1]) == self.nbr_cards - 1
             && usize::from(card) == self.nbr_cards - 2;
 
-        self.history_tracker.update(abs_command);
         self.last_shrunk = shrink;
-
-        if to_abs == self.pos_of_highest_card {
+        if to_abs == self.pos_highest_card {
             if !should_go_on_top {
                 self.has_solution_pile = false;
             }
@@ -243,33 +227,34 @@ impl Board {
                 self.nbr_cards -= 1;
             }
         }
-        if moved_higest_card {
-            self.pos_of_highest_card = to_abs;
-            self.highest_card_is_on_bottom = self.piles[to_abs].is_empty();
+        if moved_highest_card {
+            self.pos_highest_card = to_abs;
+            self.highest_card_on_bottom = self.piles[to_abs].is_empty();
             self.has_solution_pile = self.piles[to_abs].is_empty();
         }
         self.piles[from_abs].pop().unwrap();
         self.piles[to_abs].push(card);
-        self.translator.update_indexes(&self.piles);
+
+        self.history.update(abs_command);
+        self.translator.update(&self.piles);
     }
     /// A solved pile will be identical to a pile with the cards \[2,1\] in one pile and no other
     /// cards.
     pub fn solved(&self) -> bool {
-        self.piles[self.pos_of_highest_card] == SOLUTION_PILE
+        self.piles[self.pos_highest_card] == SOLUTION_PILE
     }
 
     pub fn get_reverted(&self) -> Board {
-        match self.history_tracker.last_move() {
+        match self.history.last_move() {
             None => panic!(),
-            Some(some_move) => {
-                let mut the_move = some_move;
-                the_move.reverse();
+            Some(mut abs_move) => {
+                abs_move.reverse();
                 let mut board = self.clone();
                 if board.last_shrunk {
-                    board.piles[self.pos_of_highest_card]
+                    board.piles[self.pos_highest_card]
                         .insert(0, u8::try_from(self.nbr_cards + 1).unwrap());
                 }
-                board.perform_move_unchecked(self.translator.into_rel_move(the_move));
+                board.perform_move(self.translator.into_rel_move(abs_move));
                 board
             }
         }
@@ -278,7 +263,7 @@ impl Board {
         let mut children = Vec::new();
         for move_action in self.good_moves_rel() {
             let mut board = self.clone();
-            board.perform_move(move_action, "good children");
+            board.perform_move(move_action);
             children.push((board, move_action));
         }
         children
@@ -361,13 +346,13 @@ pub mod tests {
 
         assert_ne!(get_hash(&board1), get_hash(&board2));
 
-        board1.perform_move([0, 1], ""); //[4][1,2,3]
-        board2.perform_move([0, 1], ""); //[3][1,2,4]
+        board1.perform_move([0, 1]); //[4][1,2,3]
+        board2.perform_move([0, 1]); //[3][1,2,4]
 
         assert_ne!(get_hash(&board1), get_hash(&board2));
 
-        board1.perform_move([1, 2], ""); //[4][3][1,2]
-        board2.perform_move([1, 2], ""); //[4][3][1,2]
+        board1.perform_move([1, 2]); //[4][3][1,2]
+        board2.perform_move([1, 2]); //[4][3][1,2]
 
         assert_eq!(get_hash(&board1), get_hash(&board2));
     }
@@ -380,13 +365,13 @@ pub mod tests {
         insert_new_key_to_hash_set(&mut hash_set, &board1);
         insert_new_key_to_hash_set(&mut hash_set, &board2);
 
-        board1.perform_move([0, 1], ""); //[4][1,2,3]
-        board2.perform_move([0, 1], ""); //[3][1,2,4]
+        board1.perform_move([0, 1]); //[4][1,2,3]
+        board2.perform_move([0, 1]); //[3][1,2,4]
         insert_new_key_to_hash_set(&mut hash_set, &board1);
         insert_new_key_to_hash_set(&mut hash_set, &board2);
 
-        board1.perform_move([1, 2], ""); //[4][3][1,2]
-        board2.perform_move([1, 2], ""); //[4][3][1,2]
+        board1.perform_move([1, 2]); //[4][3][1,2]
+        board2.perform_move([1, 2]); //[4][3][1,2]
         insert_new_key_to_hash_set(&mut hash_set, &board1);
         assert!(hash_set.contains(&board2));
     }
@@ -408,14 +393,14 @@ pub mod tests {
         assert_ne!(format!("{}", board1), format!("{}", board2));
         println!("{board1} != {board2} ");
 
-        board1.perform_move([0, 1], ""); //[4][1,2,3]
-        board2.perform_move([0, 1], ""); //[3][1,2,4]
+        board1.perform_move([0, 1]); //[4][1,2,3]
+        board2.perform_move([0, 1]); //[3][1,2,4]
 
         assert_ne!(format!("{}", board1), format!("{}", board2));
         println!("{board1} != {board2} ");
 
-        board1.perform_move([1, 2], ""); //[4][3][1,2]
-        board2.perform_move([1, 2], ""); //[4][3][1,2]
+        board1.perform_move([1, 2]); //[4][3][1,2]
+        board2.perform_move([1, 2]); //[4][3][1,2]
 
         assert_eq!(format!("{}", board1), format!("{}", board2));
         println!("{board1} == {board2} ");
@@ -448,7 +433,7 @@ pub mod tests {
             assert_eq!(&set.get(&board).unwrap(), &board);
         }
         for mut board in all_board {
-            board.perform_move([0, 1], "hashing_test");
+            board.perform_move([0, 1]);
             assert!(!set.contains(&board));
             set.insert(board.clone());
             assert!(set.contains(&board));
@@ -467,15 +452,15 @@ pub mod tests {
         assert!(board1 != board2);
         assert!(board1 != board3);
 
-        board1.perform_move([0, 1], "partial eq test"); // [2] [1,4,3]
-        board2.perform_move([0, 1], "partial eq test"); // [3] [1,4,2]
+        board1.perform_move([0, 1]); // [2] [1,4,3]
+        board2.perform_move([0, 1]); // [3] [1,4,2]
 
-        board1.perform_move([1, 2], "partial eq test"); // [3][2][1,4]
-        board2.perform_move([1, 2], "partial eq test"); // [3][2][1,4]
+        board1.perform_move([1, 2]); // [3][2][1,4]
+        board2.perform_move([1, 2]); // [3][2][1,4]
 
         assert!(board1 == board2);
 
-        board1.perform_move([1, 0], "partial eq test"); // [3,2][1,4]
+        board1.perform_move([1, 0]); // [3,2][1,4]
         assert!(board1 != board2);
         assert!(board1 == board1);
     }

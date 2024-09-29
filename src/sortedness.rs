@@ -206,11 +206,11 @@ mod tests {
         assert_eq!(piles.nbr_cards(), 16);
         let vec = [1, 9, 5, 6, 3, 8, 4, 7, 12, 2, 16, 11, 13, 14, 15, 10].to_vec();
         let mut board = Board::new(&vec, 5);
-        board.perform_move([0, 1], "nbr_card_test"); //10
-        board.perform_move([1, 0], "nbr_card_test"); //15
-        board.perform_move([1, 0], "nbr_card_test"); //14
-        board.perform_move([1, 0], "nbr_card_test"); //13
-        board.perform_move([1, 2], "nbr_card_test"); //11
+        board.perform_move([0, 1]); //10
+        board.perform_move([1, 0]); //15
+        board.perform_move([1, 0]); //14
+        board.perform_move([1, 0]); //13
+        board.perform_move([1, 2]); //11
         assert_eq!(board.nbr_cards, 16);
         assert_eq!(board.nbr_cards(), 16);
         assert_eq!(board.relative_piles().nbr_cards(), 16);

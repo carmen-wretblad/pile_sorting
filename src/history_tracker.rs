@@ -22,6 +22,7 @@ pub trait Reverter {
 pub trait HistoryTracker {
     fn unnecessary(&self, move_command: AbsMove) -> bool;
     fn remove_unnecessary(&self, move_commands: Vec<AbsMove>) -> Vec<AbsMove>;
+    fn last_move(&self) -> Option<AbsMove>;
     fn update(&mut self, move_command: AbsMove);
 }
 trait BlockerMatrixUtil {
@@ -62,15 +63,29 @@ impl HistoryTracker for HistoryTrackerImpl {
         self.set_from(move_command[1], BLOCKED);
         self.last_move = Some(move_command);
     }
-}
-impl Reverter for HistoryTrackerImpl {
-    fn revert(&self, piles: &Vec<&[u8]>, translator: Translator) {
-        unimplemented!();
-    }
     fn last_move(&self) -> Option<AbsMove> {
         self.last_move
     }
 }
+/*impl Reverter for HistoryTrackerImpl {
+fn revert(&self, piles: &Vec<&[u8]>, translator: Translator) {
+    unimplemented!();
+    match self.last_move() {
+        None => panic!(),
+        Some(some_move) => {
+            let mut the_move = some_move;
+            the_move.reverse();
+            let mut board = self.clone();
+            if board.last_shrunk {
+                board.piles[self.pos_of_highest_card]
+                    .insert(0, u8::try_from(self.nbr_cards + 1).unwrap());
+            }
+            board.perform_move(self.translator.into_rel_move(the_move));
+            board
+        }
+    }
+}*/
+
 impl BlockerMatrixUtil for HistoryTrackerImpl {
     fn get_from_to(&self, from: usize, to: usize) -> bool {
         self.blocker_matrix[from][to]

@@ -35,10 +35,10 @@ pub fn get_solution(set: &HashSet<Board>, starting_board: &Board) -> RelSolution
 
 pub fn board_seq_to_move(vec: &Vec<Board>) -> RelSolution {
     let mut vec = vec.to_owned();
-    assert!(vec[0].history_tracker.last_move().is_none());
+    assert!(vec[0].history.last_move().is_none());
     vec.remove(0);
     vec.into_iter()
-        .map(|x| x.history_tracker.last_move().unwrap())
+        .map(|x| x.history.last_move().unwrap())
         .collect()
 }
 
@@ -50,7 +50,7 @@ pub fn confirm_solution(solution: &RelSolution, starting_board: &Board) -> bool 
     let mut stepper = solution.len();
     for abs_move_command in solution {
         let rel_move = board.translator.into_rel_move(*abs_move_command);
-        board.perform_move(rel_move, "confirming_solution");
+        board.perform_move(rel_move);
         if VALIDATOR_SHOULD_PRINT {
             stepper -= 1;
 
