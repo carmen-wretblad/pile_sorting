@@ -2,17 +2,31 @@
 use ::sorting::bfs::BFS;
 use ::sorting::board::Board;
 
-use sorting::bfs;
 use sorting::node_holder::NodeHolder;
-use sorting::vector_util::all_sequences;
+use sorting::vector_util::{self, all_sequences};
+use sorting::{bfs, board, graph_queue_solver};
 fn main() {
     //stats();
     //test_node_holder();
-    test_node_holder_expensive();
+    //test_node_holder_expensive();
     //run_board();
+    test_graph_solver();
+}
+fn test_graph_solver() {
+    //let vec = [1, 8, 4, 7, 2, 3, 9, 6, 5];
+    //let board = Board::new(&vec, 5);
+    for i in 5..100 {
+        let pile = vector_util::random_vec(i);
+        let board = Board::new(&pile, 4);
+        println!("pile_height tested {i}");
+        let mut graph_solver = graph_queue_solver::GraphQueueSolverImpl::new(board);
+        graph_solver.test();
+    }
+    //let mut graph_solver = graph_queue_solver::GraphQueueSolverImpl::new(board);
+    //graph_solver.test();
 }
 fn run_board() {
-    let vec = [1, 8, 4, 7, 2, 3, 6, 5];
+    let vec = [1, 8, 4, 10, 7, 2, 3, 9, 6, 5];
     let board = Board::new(&vec, 4);
     let mut bfs = BFS::new(&board, sorting::bfs::MoveChoice::Good);
     println!("{}", bfs.solve().unwrap().len());

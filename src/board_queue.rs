@@ -28,7 +28,7 @@ impl BoardQueueImpl {
 impl BoardQueue for BoardQueueImpl {
     fn add_single(&mut self, board: Board) {
         self.underlying_structure
-            .push(board.clone(), 200 - board.theoretical_minimum());
+            .push(board.clone(), usize::MAX - board.theoretical_minimum());
     }
     fn add(&mut self, boards: Vec<Board>) {
         for board in boards {

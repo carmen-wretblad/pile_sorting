@@ -1,9 +1,12 @@
 use std::collections::HashMap;
+use std::usize;
 
 use crate::board::*;
+use crate::sortedness::*;
 use crate::BoardRep;
 use crate::RelMove;
 use crate::RelSolution;
+use petgraph::algo::astar;
 use petgraph::graph::Graph as PGraph;
 use petgraph::graph::NodeIndex;
 
@@ -22,6 +25,7 @@ pub trait SolvableGraph: Graph {
     fn found_solution_pile(&self) -> bool;
     fn solved(&self) -> bool;
     fn solution(&self) -> Option<RelSolution>;
+    fn test(&self);
     /// Not required to be exhaustive
     fn solutions(&self) -> Option<Vec<RelSolution>>;
 }
@@ -30,17 +34,29 @@ pub trait DebugGraph: Graph {
     fn shortest_path(&self) -> Option<Vec<RelSolution>>;
     fn longest_path(&self) -> Option<Vec<RelSolution>>;
 }
+#[derive(Debug)]
 pub struct GraphImpl {
-    underlying_structure: PGraph<(), RelMove>,
+    underlying_structure: PGraph<BoardRep, RelMove>,
     seen_nodes: HashMap<BoardRep, NodeIndex>,
+    board_rep_for_index: HashMap<NodeIndex, Board>,
+    index_starting_pile: Option<NodeIndex>,
+    index_solution_pile: Option<NodeIndex>,
 }
 impl Graph for GraphImpl {
     fn new(starting: &Board) -> Self {
         let mut graph = Self {
-            underlying_structure: PGraph::<(), RelMove>::new(),
+            underlying_structure: PGraph::<BoardRep, RelMove>::new(),
             seen_nodes: HashMap::new(),
+            board_rep_for_index: HashMap::new(),
+            index_starting_pile: None,
+            index_solution_pile: None,
         };
-        graph.add_node_internal(starting);
+        let index: NodeIndex = graph
+            .underlying_structure
+            .add_node(starting.relative_piles());
+        graph.seen_nodes.insert(starting.relative_piles(), index);
+        graph.index_starting_pile = Some(index);
+        graph.board_rep_for_index.insert(index, starting.clone());
         graph
     }
 
@@ -66,7 +82,7 @@ impl Graph for GraphImpl {
 }
 impl SolvableGraph for GraphImpl {
     fn found_solution_pile(&self) -> bool {
-        unimplemented!()
+        self.index_solution_pile.is_some()
     }
     fn solved(&self) -> bool {
         unimplemented!()
@@ -74,6 +90,32 @@ impl SolvableGraph for GraphImpl {
     fn solution(&self) -> Option<RelSolution> {
         unimplemented!()
     }
+    fn test(&self) {
+        let path = astar(
+            &self.underlying_structure,
+            self.index_starting_pile.unwrap(),
+            |x| self.board_rep_for_index.get(&x).unwrap().solved(),
+            |_| 1,
+            |x| {
+                self.board_rep_for_index
+                    .get(&x)
+                    .unwrap()
+                    .theoretical_minimum()
+            },
+        )
+        .unwrap();
+
+        println!("{}", path.1.len());
+        println!("{}", path.0);
+        //for item in path.1 {
+        //    println!("{}", self.board_rep_for_index.get(&item).unwrap());
+        //}
+
+        //for item in path.1 {
+        //    println!("{}", self.board_rep_for_index.get(&item).unwrap());
+        //}
+    }
+
     fn solutions(&self) -> Option<Vec<RelSolution>> {
         unimplemented!()
     }
@@ -91,8 +133,12 @@ impl GraphImpl {
     }
     //TODO, make sure & works
     fn add_node_internal(&mut self, board: &Board) {
-        let index: NodeIndex = self.underlying_structure.add_node(());
+        let index: NodeIndex = self.underlying_structure.add_node(board.relative_piles());
+        if board.solved() {
+            self.index_solution_pile = Some(index);
+        }
         self.seen_nodes.insert(board.relative_piles(), index);
+        self.board_rep_for_index.insert(index, board.clone());
     }
     fn want_info(&self, board: &Board) -> bool {
         !self.contains(board) //TODO
