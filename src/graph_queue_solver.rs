@@ -9,7 +9,7 @@ pub struct GraphQueueSolverImpl {
 impl GraphQueueSolverImpl {
     fn new(starting_board: Board) -> Self {
         Self {
-            graph: GraphImpl::new(starting_board.clone()),
+            graph: GraphImpl::new(&starting_board),
             queue: BoardQueueImpl::new(starting_board),
         }
     }

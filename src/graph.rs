@@ -1,11 +1,14 @@
+use std::collections::HashMap;
+
 use crate::board::*;
 use crate::BoardRep;
-
 use crate::RelMove;
 use crate::RelSolution;
+use petgraph::graph::Graph as PGraph;
+use petgraph::graph::NodeIndex;
 
 pub trait Graph {
-    fn new(starting: Board) -> Self;
+    fn new(starting: &Board) -> Self;
     fn add_node(&self, parent: Board, child: (Board, RelMove)) -> Board;
     fn add(&mut self, parent: Board, children: Vec<(Board, RelMove)>) -> Vec<Board>;
 }
@@ -26,11 +29,20 @@ pub trait DebugGraph: Graph {
     fn shortest_path(&self) -> Option<Vec<RelSolution>>;
     fn longest_path(&self) -> Option<Vec<RelSolution>>;
 }
-pub struct GraphImpl {}
+pub struct GraphImpl {
+    underlying_structure: PGraph<(), RelMove>,
+    seen_nodes: HashMap<BoardRep, NodeIndex>,
+}
 impl Graph for GraphImpl {
-    fn new(starting: Board) -> Self {
-        unimplemented!();
+    fn new(starting: &Board) -> Self {
+        let mut graph = Self {
+            underlying_structure: PGraph::<(), RelMove>::new(),
+            seen_nodes: HashMap::new(),
+        };
+        graph.add_node_internal(starting);
+        graph
     }
+
     fn add_node(&self, rep: Board, child: (Board, RelMove)) -> Board {
         unimplemented!();
     }
@@ -52,15 +64,20 @@ impl SolvableGraph for GraphImpl {
 
 impl GraphImpl {
     fn contains(&self, board: &Board) -> bool {
-        unimplemented!()
+        self.seen_nodes.contains_key(&board.relative_piles())
     }
-    fn add_edge(&mut self) {
-        unimplemented!()
+    fn add_edge(&mut self, from: &Board, to: &Board, edge: RelMove) {
+        let from_index = self.seen_nodes.get(&from.relative_piles()).unwrap();
+        let to_index = self.seen_nodes.get(&to.relative_piles()).unwrap();
+        self.underlying_structure
+            .add_edge(*from_index, *to_index, edge);
     }
-    fn add_node_internal(&mut self) {
-        unimplemented!()
+    //TODO, make sure & works
+    fn add_node_internal(&mut self, board: &Board) {
+        let index: NodeIndex = self.underlying_structure.add_node(());
+        self.seen_nodes.insert(board.relative_piles(), index);
     }
     fn want_info(&self, board: &Board) -> bool {
-        self.contains(board) //TODO
+        !self.contains(board) //TODO
     }
 }
