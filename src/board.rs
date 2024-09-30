@@ -1,4 +1,3 @@
-use crate::graph::GraphID;
 use crate::history_tracker::HistoryTracker;
 use crate::history_tracker::HistoryTrackerImpl;
 use crate::sortedness::Sortedness;
@@ -80,11 +79,6 @@ impl fmt::Display for Board {
             self.depth_of_next_card(),
             self.sortedness()
         )
-    }
-}
-impl GraphID for Board {
-    fn id(self) -> BoardRep {
-        self.relative_piles()
     }
 }
 fn cartesian_product(nbr: usize) -> Vec<AbsMove> {

@@ -1,4 +1,6 @@
-use crate::{board::Board, board_queue::BoardQueueImpl, graph::GraphImpl};
+use crate::board::*;
+use crate::board_queue::*;
+use crate::graph::*;
 
 pub struct GraphQueueSolverImpl {
     graph: GraphImpl,
@@ -6,9 +8,18 @@ pub struct GraphQueueSolverImpl {
 }
 impl GraphQueueSolverImpl {
     fn new(starting_board: Board) -> Self {
-        unimplemented!()
+        Self {
+            graph: GraphImpl::new(starting_board.clone()),
+            queue: BoardQueueImpl::new(starting_board),
+        }
     }
     fn next(&mut self) {
-        unimplemented!()
+        let board: Board = self.queue.next().unwrap(); //TODO
+        let children = board.good_children();
+        let wanted_children = self.graph.add(board, children);
+        self.queue.add(wanted_children);
+    }
+    fn solved(&self) {
+        self.graph.solved();
     }
 }
