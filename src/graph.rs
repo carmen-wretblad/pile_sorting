@@ -9,7 +9,7 @@ use petgraph::graph::NodeIndex;
 
 pub trait Graph {
     fn new(starting: &Board) -> Self;
-    fn add_node(&self, parent: Board, child: (Board, RelMove)) -> Board;
+    fn add_node(&mut self, parent: &Board, child: (Board, RelMove)) -> Option<Board>;
     fn add(&mut self, parent: Board, children: Vec<(Board, RelMove)>) -> Vec<Board>;
 }
 
@@ -19,6 +19,7 @@ pub trait GraphInfo: Graph {
 }
 
 pub trait SolvableGraph: Graph {
+    fn found_solution_pile(&self) -> bool;
     fn solved(&self) -> bool;
     fn solution(&self) -> Option<RelSolution>;
     /// Not required to be exhaustive
@@ -43,14 +44,30 @@ impl Graph for GraphImpl {
         graph
     }
 
-    fn add_node(&self, rep: Board, child: (Board, RelMove)) -> Board {
-        unimplemented!();
+    fn add_node(&mut self, rep: &Board, child: (Board, RelMove)) -> Option<Board> {
+        if self.contains(&child.0) {
+            None
+        } else {
+            self.add_node_internal(&child.0);
+            self.add_edge(&rep, &child.0, child.1);
+            Some(child.0)
+        }
     }
     fn add(&mut self, parent: Board, children: Vec<(Board, RelMove)>) -> Vec<Board> {
-        unimplemented!();
+        let mut boards: Vec<Board> = Vec::new();
+        for child in children {
+            let result = self.add_node(&parent, child);
+            if let Some(board) = result {
+                boards.push(board);
+            }
+        }
+        boards
     }
 }
 impl SolvableGraph for GraphImpl {
+    fn found_solution_pile(&self) -> bool {
+        unimplemented!()
+    }
     fn solved(&self) -> bool {
         unimplemented!()
     }
