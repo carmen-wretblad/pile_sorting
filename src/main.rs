@@ -10,7 +10,8 @@ fn main() {
     //test_node_holder();
     //test_node_holder_expensive();
     //run_board();
-    test_graph_solver();
+    //test_graph_solver();
+    run_compare()
 }
 fn test_graph_solver() {
     //let vec = [1, 8, 4, 7, 2, 3, 9, 6, 5];
@@ -32,6 +33,19 @@ fn run_board() {
     println!("{}", bfs.solve().unwrap().len());
     println!("bfs board counter {} ", bfs.board_counter);
     println!("bfs steps: {}", bfs.step_counter);
+}
+fn run_compare() {
+    let vec = [1, 8, 4, 7, 2, 3, 6, 5];
+    let board = Board::new(&vec, 4);
+    let mut bfs = BFS::new(&board, sorting::bfs::MoveChoice::Good);
+    let mut graph_solver = graph_queue_solver::GraphQueueSolverImpl::new(board.clone());
+    bfs.solve();
+    graph_solver.test();
+    let bfs_len = bfs.get_full_solution().unwrap().len();
+    let graph_len = graph_solver.get_full_solution().unwrap().len();
+    //println!("{}", bfs.solve().unwrap().len());
+    println!("bfs len {bfs_len} ");
+    println!("graph len {graph_len}")
 }
 
 fn test_node_holder() {

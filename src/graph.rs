@@ -34,10 +34,10 @@ pub trait DebugGraph: Graph {
     fn shortest_path(&self) -> Option<Vec<RelSolution>>;
     fn longest_path(&self) -> Option<Vec<RelSolution>>;
 }
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct GraphImpl {
     underlying_structure: PGraph<BoardRep, RelMove>,
-    seen_nodes: HashMap<BoardRep, NodeIndex>,
+    seen_nodes: HashMap<Board, NodeIndex>,
     board_rep_for_index: HashMap<NodeIndex, Board>,
     index_starting_pile: Option<NodeIndex>,
     index_solution_pile: Option<NodeIndex>,
@@ -54,7 +54,7 @@ impl Graph for GraphImpl {
         let index: NodeIndex = graph
             .underlying_structure
             .add_node(starting.relative_piles());
-        graph.seen_nodes.insert(starting.relative_piles(), index);
+        graph.seen_nodes.insert(starting.clone(), index);
         graph.index_starting_pile = Some(index);
         graph.board_rep_for_index.insert(index, starting.clone());
         graph
@@ -123,11 +123,11 @@ impl SolvableGraph for GraphImpl {
 
 impl GraphImpl {
     fn contains(&self, board: &Board) -> bool {
-        self.seen_nodes.contains_key(&board.relative_piles())
+        self.seen_nodes.contains_key(&board)
     }
     fn add_edge(&mut self, from: &Board, to: &Board, edge: RelMove) {
-        let from_index = self.seen_nodes.get(&from.relative_piles()).unwrap();
-        let to_index = self.seen_nodes.get(&to.relative_piles()).unwrap();
+        let from_index = self.seen_nodes.get(&from).unwrap();
+        let to_index = self.seen_nodes.get(&to).unwrap();
         self.underlying_structure
             .add_edge(*from_index, *to_index, edge);
     }
@@ -137,10 +137,16 @@ impl GraphImpl {
         if board.solved() {
             self.index_solution_pile = Some(index);
         }
-        self.seen_nodes.insert(board.relative_piles(), index);
+        self.seen_nodes.insert(board.clone(), index);
         self.board_rep_for_index.insert(index, board.clone());
     }
     fn want_info(&self, board: &Board) -> bool {
         !self.contains(board) //TODO
+    }
+    pub fn get(&self, board: &Board) -> Option<Board> {
+        match self.seen_nodes.get_key_value(&board) {
+            Some(val) => Some(val.0.clone()),
+            None => None,
+        }
     }
 }

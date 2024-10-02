@@ -1,4 +1,6 @@
 use crate::board::*;
+use crate::graph::Graph;
+use crate::graph::GraphImpl;
 use crate::history_tracker::*;
 use crate::sortedness::Sortedness;
 use crate::RelMove;
@@ -22,6 +24,32 @@ pub fn get_solution(set: &HashSet<Board>, starting_board: &Board) -> RelSolution
         }
 
         let future_next_board = set
+            .get(&next_board.get_reverted())
+            .expect("Always have to be a next board")
+            .clone();
+        assert_ne!(future_next_board, next_board);
+        next_board = future_next_board;
+    }
+
+    board_sequence_inverted.reverse();
+    board_seq_to_move(&board_sequence_inverted)
+}
+pub fn get_solution_graph(graph: GraphImpl, starting_board: &Board) -> RelSolution {
+    let nbr_piles = starting_board.piles.len();
+    let mut board_sequence_inverted: Vec<Board> = Vec::new();
+    let solution_board_proxy = Board::new_solved_board(nbr_piles);
+    let solution_board: Board = graph
+        .get(&solution_board_proxy)
+        .expect("There must be a solved board for this to work")
+        .to_owned();
+    let mut next_board = solution_board;
+    loop {
+        board_sequence_inverted.push(next_board.clone());
+        if next_board == *starting_board {
+            break;
+        }
+
+        let future_next_board = graph
             .get(&next_board.get_reverted())
             .expect("Always have to be a next board")
             .clone();
