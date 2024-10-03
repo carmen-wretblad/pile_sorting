@@ -10,8 +10,8 @@ fn main() {
     //test_node_holder();
     //test_node_holder_expensive();
     //run_board();
-    //test_graph_solver();
-    run_compare()
+    test_graph_solver();
+    //run_compare()
 }
 fn test_graph_solver() {
     //let vec = [1, 8, 4, 7, 2, 3, 9, 6, 5];

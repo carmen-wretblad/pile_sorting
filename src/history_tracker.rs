@@ -1,6 +1,5 @@
 use crate::translator::Translator;
 use crate::{AbsMove, NBR_PILES};
-use std::usize;
 
 // IDEA: use a singular vec and translate the indicies instead
 
@@ -14,15 +13,15 @@ pub struct HistoryTrackerImpl {
 }
 
 pub trait Reverter {
-    fn revert(&self, piles: &Vec<&[u8]>, translator: Translator);
+    fn revert(&self, piles: &[&[u8]], translator: Translator);
     fn last_move(&self) -> Option<AbsMove>;
 }
 
 pub trait HistoryTracker {
-    fn unnecessary(&self, move_command: AbsMove) -> bool;
+    fn unnecessary(&self, move_command: &AbsMove) -> bool;
     fn remove_unnecessary(&self, move_commands: Vec<AbsMove>) -> Vec<AbsMove>;
     fn last_move(&self) -> Option<AbsMove>;
-    fn update(&mut self, move_command: AbsMove);
+    fn update(&mut self, move_command: &AbsMove);
 }
 trait BlockerMatrixUtil {
     fn get_from_to(&self, from: usize, to: usize) -> bool;
@@ -40,19 +39,19 @@ impl HistoryTrackerImpl {
     }
 }
 impl HistoryTracker for HistoryTrackerImpl {
-    fn unnecessary(&self, move_command: AbsMove) -> bool {
+    fn unnecessary(&self, move_command: &AbsMove) -> bool {
         self.get_from_to(move_command[0], move_command[1])
     }
     fn remove_unnecessary(&self, move_commands: Vec<AbsMove>) -> Vec<AbsMove> {
         move_commands
             .into_iter()
-            .filter(|x| !self.unnecessary(*x))
+            .filter(|x| !self.unnecessary(x))
             .collect()
     }
-    fn update(&mut self, move_command: AbsMove) {
+    fn update(&mut self, move_command: &AbsMove) {
         self.set_to(move_command[0], USABLE);
         self.set_from(move_command[1], BLOCKED);
-        self.last_move = Some(move_command);
+        self.last_move = Some(*move_command);
     }
     fn last_move(&self) -> Option<AbsMove> {
         self.last_move

@@ -50,7 +50,7 @@ impl GraphQueueSolverImpl {
         self.graph.test();
         //println!("boards_seen: {boards_seen}");
         //println!("boards_rejected {boards_rejected}");
-
+        /*
         let mut boards_seen_2 = 0;
         let mut boards_rejected_2 = 0;
         while !self.queue.empty() {
@@ -62,7 +62,7 @@ impl GraphQueueSolverImpl {
             let wanted_children = self.graph.add(board, children);
             boards_rejected_2 += boards_given - wanted_children.len();
             self.queue.add(wanted_children);
-        }
+        }*/
         //println!("boards_seen: {boards_seen}");
         //println!("boards_rejected {boards_rejected}");
         //println!("boards_seen_2 {boards_seen_2}");

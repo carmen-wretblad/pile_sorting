@@ -1,5 +1,3 @@
-use std::usize;
-
 use crate::{board::Board, sortedness::Sortedness};
 use priority_queue::priority_queue::PriorityQueue;
 

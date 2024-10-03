@@ -1,7 +1,6 @@
 use crate::{board::Board, BoardRep};
 use std::cmp::{max, Ord};
 use std::fmt::Debug;
-use std::{u8, usize};
 
 pub trait Sortedness: Debug {
     fn heights(&self) -> Vec<usize>;

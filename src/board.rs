@@ -193,15 +193,11 @@ impl Board {
         } else {
             moves.retain(|x| x[1] != self.pos_highest_card);
         }
-        moves.retain(|x| !self.unnecessary(x));
+        moves.retain(|x| !self.history.unnecessary(x));
         moves
             .iter_mut()
             .for_each(|x| *x = self.translator.into_rel_move(*x));
         moves
-    }
-
-    fn unnecessary(&self, move_command: &AbsMove) -> bool {
-        self.history.unnecessary(*move_command)
     }
 
     /// Performs a move. Move instructions are "relative".
@@ -240,7 +236,7 @@ impl Board {
         self.piles[from_abs].pop().unwrap();
         self.piles[to_abs].push(card);
 
-        self.history.update(abs_command);
+        self.history.update(&abs_command);
         self.translator.update(&self.piles);
     }
     /// A solved pile will be identical to a pile with the cards \[2,1\] in one pile and no other

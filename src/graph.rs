@@ -1,5 +1,4 @@
 use std::collections::HashMap;
-use std::usize;
 
 use crate::board::*;
 use crate::sortedness::*;

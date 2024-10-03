@@ -1,7 +1,6 @@
 use rand::seq::SliceRandom;
 use rand::thread_rng;
 use std::collections::HashSet;
-use std::usize;
 
 /// Checks that a given sequence doesn't contain gaps.
 pub fn correct_sequence(input_vector: &[u8]) -> bool {
