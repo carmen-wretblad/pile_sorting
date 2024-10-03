@@ -20,7 +20,7 @@ impl GraphQueueSolverImpl {
     pub fn next(&mut self) {
         let board: Board = self.queue.next().unwrap(); //TODO
         let children = board.good_children();
-        let wanted_children = self.graph.add(board, children);
+        let wanted_children = self.graph.add(&board, children);
         self.queue.add(wanted_children);
     }
     fn solved(&self) {
@@ -43,7 +43,7 @@ impl GraphQueueSolverImpl {
             let children = board.good_children();
             let boards_given = children.len();
             boards_seen += boards_given;
-            let wanted_children = self.graph.add(board, children);
+            let wanted_children = self.graph.add(&board, children);
             boards_rejected += boards_given - wanted_children.len();
             self.queue.add(wanted_children);
         }

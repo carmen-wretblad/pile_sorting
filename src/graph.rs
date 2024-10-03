@@ -12,7 +12,7 @@ use petgraph::graph::NodeIndex;
 pub trait Graph {
     fn new(starting: &Board) -> Self;
     fn add_node(&mut self, parent: &Board, child: (Board, RelMove)) -> Option<Board>;
-    fn add(&mut self, parent: Board, children: Vec<(Board, RelMove)>) -> Vec<Board>;
+    fn add(&mut self, parent: &Board, children: Vec<(Board, RelMove)>) -> Vec<Board>;
 }
 
 pub trait GraphInfo: Graph {
@@ -64,14 +64,14 @@ impl Graph for GraphImpl {
             None
         } else {
             self.add_node_internal(&child.0);
-            self.add_edge(&rep, &child.0, child.1);
+            self.add_edge(rep, &child.0, child.1);
             Some(child.0)
         }
     }
-    fn add(&mut self, parent: Board, children: Vec<(Board, RelMove)>) -> Vec<Board> {
+    fn add(&mut self, parent: &Board, children: Vec<(Board, RelMove)>) -> Vec<Board> {
         let mut boards: Vec<Board> = Vec::new();
         for child in children {
-            let result = self.add_node(&parent, child);
+            let result = self.add_node(parent, child);
             if let Some(board) = result {
                 boards.push(board);
             }
@@ -122,11 +122,11 @@ impl SolvableGraph for GraphImpl {
 
 impl GraphImpl {
     fn contains(&self, board: &Board) -> bool {
-        self.seen_nodes.contains_key(&board)
+        self.seen_nodes.contains_key(board)
     }
     fn add_edge(&mut self, from: &Board, to: &Board, edge: RelMove) {
-        let from_index = self.seen_nodes.get(&from).unwrap();
-        let to_index = self.seen_nodes.get(&to).unwrap();
+        let from_index = self.seen_nodes.get(from).unwrap();
+        let to_index = self.seen_nodes.get(to).unwrap();
         self.underlying_structure
             .add_edge(*from_index, *to_index, edge);
     }
@@ -143,9 +143,9 @@ impl GraphImpl {
         !self.contains(board) //TODO
     }
     pub fn get(&self, board: &Board) -> Option<Board> {
-        match self.seen_nodes.get_key_value(&board) {
-            Some(val) => Some(val.0.clone()),
-            None => None,
-        }
+        self.seen_nodes
+            .get_key_value(board)
+            .map(|val| val.0)
+            .cloned()
     }
 }

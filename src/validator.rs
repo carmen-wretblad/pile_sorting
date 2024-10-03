@@ -3,8 +3,8 @@ use crate::graph::GraphImpl;
 use crate::history_tracker::*;
 use crate::sortedness::Sortedness;
 use crate::RelSolution;
+use crate::*;
 use std::collections::HashSet;
-const VALIDATOR_SHOULD_PRINT: bool = true;
 
 pub fn get_solution(set: &HashSet<Board>, starting_board: &Board) -> RelSolution {
     let mut board_sequence_inverted: Vec<Board> = Vec::new();

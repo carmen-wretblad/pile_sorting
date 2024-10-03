@@ -69,7 +69,7 @@ impl Translator {
             self.abs_to_rel_translator[abs[1]],
         ]
     }
-    pub fn into_rel_vector(&self, abs_vec: &Vec<[usize; 2]>) -> Vec<[usize; 2]> {
+    pub fn into_rel_vector(&self, abs_vec: &[[usize; 2]]) -> Vec<[usize; 2]> {
         abs_vec
             .iter()
             .map(|abs_move| self.into_rel_move(*abs_move))

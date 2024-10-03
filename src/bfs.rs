@@ -1,9 +1,9 @@
 #![allow(unused, dead_code)]
-const SHOULD_PRINT_FOUND_BOARDS: bool = false;
-const SHOULD_PRINT_STEP_COUNTER: bool = false;
+
 use crate::RelSolution;
 
 use crate::validator::*;
+use crate::*;
 use crate::{board, validator};
 use crate::{board::*, AbsMove, RelMove};
 use std::collections::HashSet;
@@ -54,14 +54,14 @@ impl BFS {
                 newboard.perform_move(move_command);
                 if newboard.solved() {
                     self.found_boards.insert(newboard.clone());
-                    if SHOULD_PRINT_FOUND_BOARDS {
+                    if BFS_SHOULD_PRINT_FOUND_BOARDS {
                         println!("board: {}", &newboard);
                     }
                     self.solved_board = Some(newboard.clone());
                     return true;
                 }
                 if !self.found_boards.contains(&newboard) {
-                    if SHOULD_PRINT_FOUND_BOARDS {
+                    if BFS_SHOULD_PRINT_FOUND_BOARDS {
                         println!("board :{}", &newboard)
                     };
                     self.next_boards.insert(newboard.clone());
@@ -77,7 +77,7 @@ impl BFS {
         self.current_boards = self.next_boards.clone();
         self.next_boards.clear();
         self.step_counter += 1;
-        if SHOULD_PRINT_STEP_COUNTER {
+        if BFS_SHOULD_PRINT_STEP_COUNTER {
             println!("step {} ################################################################################", self.step_counter);
         }
         assert!(self.solved_board.is_none());
