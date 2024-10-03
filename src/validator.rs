@@ -11,7 +11,7 @@ const VALIDATOR_SHOULD_PRINT: bool = true;
 pub fn get_solution(set: &HashSet<Board>, starting_board: &Board) -> RelSolution {
     let nbr_piles = starting_board.piles.len();
     let mut board_sequence_inverted: Vec<Board> = Vec::new();
-    let solution_board_proxy = Board::new_solved_board(nbr_piles);
+    let solution_board_proxy = Board::new_solved_board();
     let solution_board: Board = set
         .get(&solution_board_proxy)
         .expect("There must be a solved board for this to work")
@@ -37,7 +37,7 @@ pub fn get_solution(set: &HashSet<Board>, starting_board: &Board) -> RelSolution
 pub fn get_solution_graph(graph: GraphImpl, starting_board: &Board) -> RelSolution {
     let nbr_piles = starting_board.piles.len();
     let mut board_sequence_inverted: Vec<Board> = Vec::new();
-    let solution_board_proxy = Board::new_solved_board(nbr_piles);
+    let solution_board_proxy = Board::new_solved_board();
     let solution_board: Board = graph
         .get(&solution_board_proxy)
         .expect("There must be a solved board for this to work")

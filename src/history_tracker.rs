@@ -1,5 +1,5 @@
 use crate::translator::Translator;
-use crate::AbsMove;
+use crate::{AbsMove, NBR_PILES};
 use std::usize;
 
 // IDEA: use a singular vec and translate the indicies instead
@@ -9,9 +9,8 @@ const USABLE: bool = false;
 
 #[derive(Debug, Clone)]
 pub struct HistoryTrackerImpl {
-    nbr_piles: usize,
     last_move: Option<AbsMove>,
-    blocker_matrix: Vec<Vec<bool>>,
+    blocker_matrix: [[bool; NBR_PILES]; NBR_PILES],
 }
 
 pub trait Reverter {
@@ -33,18 +32,10 @@ trait BlockerMatrixUtil {
 }
 
 impl HistoryTrackerImpl {
-    pub fn new(nbr_piles: usize) -> Self {
-        let mut matrix = Vec::new();
-        for i in 0..nbr_piles {
-            matrix.push(Vec::new());
-            for _ in 0..nbr_piles {
-                matrix[i].push(USABLE);
-            }
-        }
+    pub fn new() -> Self {
         Self {
-            nbr_piles,
             last_move: None,
-            blocker_matrix: matrix,
+            blocker_matrix: [[false; NBR_PILES]; NBR_PILES],
         }
     }
 }
@@ -94,12 +85,12 @@ impl BlockerMatrixUtil for HistoryTrackerImpl {
         self.blocker_matrix[from][to] = status;
     }
     fn set_from(&mut self, from: usize, status: bool) {
-        for i in 0..self.nbr_piles {
+        for i in 0..NBR_PILES {
             self.blocker_matrix[from][i] = status;
         }
     }
     fn set_to(&mut self, to: usize, status: bool) {
-        for i in 0..self.nbr_piles {
+        for i in 0..NBR_PILES {
             self.blocker_matrix[i][to] = status;
         }
     }

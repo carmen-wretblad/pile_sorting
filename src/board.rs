@@ -132,12 +132,12 @@ impl Board {
             highest_card_on_bottom: new_highest_card_on_bottom,
             has_solution_pile: false,
             pos_highest_card: 0,
-            history: HistoryTrackerImpl::new(new_nbr_cards),
+            history: HistoryTrackerImpl::new(),
             last_shrunk: false,
         };
         board
     }
-    pub fn new_solved_board(nbr_piles: usize) -> Board {
+    pub fn new_solved_board() -> Board {
         Board::new(&[3, 2, 1]) //this will get shrunk to [2,1], which is to small to
                                //create manually
     }

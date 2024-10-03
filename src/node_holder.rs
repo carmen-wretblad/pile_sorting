@@ -32,7 +32,7 @@ impl NodeHolder {
         Self {
             info: ProgramInfo {
                 starting_board: board.clone(),
-                end_board: Board::new_solved_board(board.piles.len()),
+                end_board: Board::new_solved_board(),
                 nbr_piles: board.piles.len(),
                 innitial_nbr_cards: board.nbr_cards,
             },
