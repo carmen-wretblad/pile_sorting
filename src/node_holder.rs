@@ -1,7 +1,7 @@
 #[allow(unused, dead_code)]
 use crate::board::Board;
 use crate::node_content::NodeContent;
-use crate::sortedness;
+
 use crate::sortedness::Sortedness;
 use crate::BoardRep;
 use std::collections::HashMap;
@@ -111,7 +111,7 @@ impl NodeHolder {
         self.solved_flag
     }
 
-    fn prune_future_generation(&mut self, nbr_cards: usize) {
+    fn prune_future_generation(&mut self, _nbr_cards: usize) {
         println!("before removing: {}", self.future_generation.len());
         //self.future_generation
         //    .retain(|x| x.0.nbr_cards == nbr_cards);

@@ -4,7 +4,7 @@ use ::sorting::board::Board;
 
 use sorting::node_holder::NodeHolder;
 use sorting::vector_util::{self, all_sequences};
-use sorting::{bfs, board, graph_queue_solver};
+use sorting::{bfs, graph_queue_solver};
 fn main() {
     //stats();
     //test_node_holder();
