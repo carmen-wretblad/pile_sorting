@@ -1,5 +1,6 @@
 #[allow(unused, dead_code)]
 pub type BoardRep = Vec<u8>;
+const NBR_PILES: usize = 5;
 pub type AbsMove = [usize; 2];
 pub type RelMove = [usize; 2];
 pub type RelSolution = Vec<RelMove>;

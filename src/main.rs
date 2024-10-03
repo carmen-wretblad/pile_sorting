@@ -18,7 +18,7 @@ fn test_graph_solver() {
     //let board = Board::new(&vec, 5);
     for i in 5..100 {
         let pile = vector_util::random_vec(i);
-        let board = Board::new(&pile, 4);
+        let board = Board::new(&pile);
         println!("pile_height tested {i}");
         let mut graph_solver = graph_queue_solver::GraphQueueSolverImpl::new(board);
         graph_solver.test();
@@ -28,7 +28,7 @@ fn test_graph_solver() {
 }
 fn run_board() {
     let vec = [1, 8, 4, 10, 7, 2, 3, 9, 6, 5];
-    let board = Board::new(&vec, 4);
+    let board = Board::new(&vec);
     let mut bfs = BFS::new(&board, sorting::bfs::MoveChoice::Good);
     println!("{}", bfs.solve().unwrap().len());
     println!("bfs board counter {} ", bfs.board_counter);
@@ -36,7 +36,7 @@ fn run_board() {
 }
 fn run_compare() {
     let vec = [1, 8, 4, 7, 2, 3, 6, 5];
-    let board = Board::new(&vec, 4);
+    let board = Board::new(&vec);
     let mut bfs = BFS::new(&board, sorting::bfs::MoveChoice::Good);
     let mut graph_solver = graph_queue_solver::GraphQueueSolverImpl::new(board.clone());
     bfs.solve();
@@ -50,7 +50,7 @@ fn run_compare() {
 
 fn test_node_holder() {
     let vec = [1, 9, 5, 6, 3, 8, 4, 7, 12, 2, 11, 14, 13, 10];
-    let board = Board::new(&vec, 5);
+    let board = Board::new(&vec);
     let mut holder = NodeHolder::new(&board);
     while !holder.is_solved() {
         holder.step();
@@ -63,7 +63,7 @@ fn test_node_holder_expensive() {
     let vec = [
         1, 9, 18, 5, 6, 3, 8, 15, 4, 17, 7, 12, 2, 11, 16, 14, 13, 10,
     ];
-    let board = Board::new(&vec, 5);
+    let board = Board::new(&vec);
     let mut holder = NodeHolder::new(&board);
     while !holder.is_solved() {
         holder.step();
@@ -79,7 +79,7 @@ fn stats() {
             let mut average = 0;
             let mut amount_looked_at = 0;
             for sequence in all_sequences(nbr_cards) {
-                let board = Board::new(&sequence, nbr_piles);
+                let board = Board::new(&sequence);
                 let lenght = BFS::new(&board, bfs::MoveChoice::Good)
                     .solve()
                     .expect("must have a solution")

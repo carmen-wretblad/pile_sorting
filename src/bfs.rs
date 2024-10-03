@@ -107,9 +107,9 @@ mod test {
     fn compare_good_and_valid() {
         let mut all_board: Vec<Board> = Vec::new();
         for pile in vector_util::all_sequences(5) {
-            all_board.push(Board::new(&pile, 4));
+            all_board.push(Board::new(&pile));
         }
-        all_board.push(Board::new(&vec![2, 5, 3, 4, 6, 1, 7], 4));
+        all_board.push(Board::new(&vec![2, 5, 3, 4, 6, 1, 7]));
         for board in all_board {
             best_solution_not_exluded(&board);
         }
@@ -142,7 +142,7 @@ mod test {
                 "pile {:?} is a valid pile",
                 &pile
             );
-            let board = Board::new(&pile, 5);
+            let board = Board::new(&pile);
             let mut bfs_valid = BFS::new(&board, MoveChoice::Valid);
             bfs_valid
                 .solve()
@@ -158,7 +158,7 @@ mod test {
                 "pile {:?} is a valid pile",
                 &pile
             );
-            let board = Board::new(&pile, 5);
+            let board = Board::new(&pile);
             let mut bfs_valid = BFS::new(&board, MoveChoice::Good);
             bfs_valid
                 .solve()
@@ -169,9 +169,8 @@ mod test {
     #[test]
     fn confirming_bug() {
         let pile = vec![1, 5, 2, 3, 4];
-        let nbr_piles = 4;
         let strategy = MoveChoice::Good;
-        let board = Board::new(&pile, nbr_piles);
+        let board = Board::new(&pile);
         let mut bfs = BFS::new(&board, strategy);
         let potential_solution = bfs.solve();
     }

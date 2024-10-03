@@ -11,6 +11,7 @@ use crate::translator::Translator;
 use crate::vector_util;
 use crate::AbsMove;
 use crate::RelMove;
+use crate::NBR_PILES;
 use core::panic;
 use std::fmt;
 use std::hash::{Hash, Hasher};
@@ -23,7 +24,7 @@ pub const SOLUTION_PILE: [u8; 2] = [2, 1];
 /// Representation of a full set of cardpiles.
 /// Piles are always sorted in order of the value of the bottom card, highest to lowest.
 pub struct Board {
-    pub piles: Vec<Vec<u8>>,
+    pub piles: [Vec<u8>; NBR_PILES],
     pub translator: Translator,
     pub nbr_cards: usize,
     highest_card_on_bottom: bool,
@@ -90,23 +91,26 @@ fn cartesian_product(nbr: usize) -> Vec<AbsMove> {
 }
 impl Board {
     /// Creates a new Board, with all cards placed in the 0th pile.
-    pub fn new(pile: &[u8], nbr_piles: usize) -> Board {
+    pub fn new(pile: &[u8]) -> Board {
         assert!(pile.len() < MAX_NBR_OF_CARDS + 1);
         assert!(MIN_NBR_OF_CARDS < pile.len() + 1);
-        assert!(nbr_piles < MAX_NBR_OF_PILES + 1);
-        assert!(MIN_NBR_OF_CARDS < nbr_piles + 1);
+        assert!(MIN_NBR_OF_CARDS < NBR_PILES + 1);
         assert!(!pile.contains(&0u8));
         assert!(vector_util::correct_sequence(pile));
 
-        let mut new_piles = Vec::new();
+        let mut new_piles_vec = Vec::new();
         let mut new_nbr_cards = pile.len();
         let mut new_highest_card_on_bottom = false;
 
-        new_piles.push(pile.to_owned());
-        for _ in 1..nbr_piles {
-            new_piles.push(Vec::<u8>::new());
+        new_piles_vec.push(pile.to_owned());
+        for _ in 1..NBR_PILES {
+            new_piles_vec.push(Vec::<u8>::new());
         }
-
+        let mut new_piles: [Vec<u8>; NBR_PILES] = new_piles_vec
+            .try_into()
+            .expect("This conversion must be valid");
+        //println!("{:?}", new_piles_vec);
+        println!("{:?}", new_piles);
         if pile.len() == pile[0].into() {
             new_highest_card_on_bottom = true;
 
@@ -120,9 +124,10 @@ impl Board {
                 }
             }
         }
+
         let board = Board {
             piles: new_piles,
-            translator: Translator::new(nbr_piles),
+            translator: Translator::new(NBR_PILES),
             nbr_cards: new_nbr_cards,
             highest_card_on_bottom: new_highest_card_on_bottom,
             has_solution_pile: false,
@@ -133,8 +138,8 @@ impl Board {
         board
     }
     pub fn new_solved_board(nbr_piles: usize) -> Board {
-        Board::new(&[3, 2, 1], nbr_piles) //this will get shrunk to [2,1], which is to small to
-                                          //create manually
+        Board::new(&[3, 2, 1]) //this will get shrunk to [2,1], which is to small to
+                               //create manually
     }
     pub fn heights(&self) -> Vec<usize> {
         self.piles.iter().map(|x| x.len()).collect()
@@ -279,53 +284,43 @@ pub mod tests {
         let input = [4, 3, 2, 1];
         let expected = SOLUTION_PILE;
 
-        let board: Board = Board::new(&input, 4);
+        let board: Board = Board::new(&input);
         assert_eq!(board.piles[0], expected);
         assert!(board.solved());
 
         let input = [1, 2, 3, 4];
         let expected = [1, 2, 3, 4];
-        let board: Board = Board::new(&input, 4);
+        let board: Board = Board::new(&input);
         assert_eq!(board.piles[0], expected);
         assert!(!board.solved());
 
         let input = [8, 7, 6, 5, 1, 2, 3, 4];
         let expected = [6, 5, 1, 2, 3, 4];
 
-        let board = Board::new(&input, 7);
+        let board = Board::new(&input);
         assert_eq!(board.piles[0], expected);
         assert!(!board.solved())
     }
     #[test]
     #[should_panic]
     fn too_short() {
-        Board::new(&[2, 1], 4);
+        Board::new(&[2, 1]);
     }
     #[test]
     #[should_panic]
     fn contains_zero() {
-        Board::new(&[3, 4, 0, 2, 1], 4);
+        Board::new(&[3, 4, 0, 2, 1]);
     }
 
     #[test]
     #[should_panic]
     fn contains_gap() {
-        Board::new(&[1, 2, 3, 5], 4);
+        Board::new(&[1, 2, 3, 5]);
     }
     #[test]
     #[should_panic]
     fn starts_at_wrong_index() {
-        Board::new(&[2, 3, 4, 6, 5], 4);
-    }
-    #[test]
-    #[should_panic]
-    fn too_few_piles() {
-        Board::new(&[4, 5, 3, 2, 1], MIN_NBR_OF_PILES - 1);
-    }
-    #[test]
-    #[should_panic]
-    fn too_many_piles() {
-        Board::new(&[4, 5, 3, 2, 1], MAX_NBR_OF_PILES + 1);
+        Board::new(&[2, 3, 4, 6, 5]);
     }
 
     fn get_hash<T>(obj: &T) -> u64
@@ -341,8 +336,8 @@ pub mod tests {
     fn hash_test() {
         //TODO: use a hashmap to double check this
 
-        let mut board1 = Board::new(&[1, 2, 3, 4], 4);
-        let mut board2 = Board::new(&[1, 2, 4, 3], 4);
+        let mut board1 = Board::new(&[1, 2, 3, 4]);
+        let mut board2 = Board::new(&[1, 2, 4, 3]);
 
         assert_ne!(get_hash(&board1), get_hash(&board2));
 
@@ -360,8 +355,8 @@ pub mod tests {
     fn hash_set_test() {
         let mut hash_set: HashSet<Board> = HashSet::new();
 
-        let mut board1 = Board::new(&[1, 2, 3, 4], 4);
-        let mut board2 = Board::new(&[1, 2, 4, 3], 4);
+        let mut board1 = Board::new(&[1, 2, 3, 4]);
+        let mut board2 = Board::new(&[1, 2, 4, 3]);
         insert_new_key_to_hash_set(&mut hash_set, &board1);
         insert_new_key_to_hash_set(&mut hash_set, &board2);
 
@@ -387,8 +382,8 @@ pub mod tests {
 
     #[test]
     fn display_test() {
-        let mut board1 = Board::new(&[1, 2, 3, 4], 4);
-        let mut board2 = Board::new(&[1, 2, 4, 3], 4);
+        let mut board1 = Board::new(&[1, 2, 3, 4]);
+        let mut board2 = Board::new(&[1, 2, 4, 3]);
 
         assert_ne!(format!("{}", board1), format!("{}", board2));
         println!("{board1} != {board2} ");
@@ -407,8 +402,8 @@ pub mod tests {
     }
     #[test]
     fn valid_solutions_test() {
-        let board1 = Board::new(&[1, 2, 3, 4, 5], 4);
-        let board2 = Board::new(&[1, 5, 2, 3, 4], 4);
+        let board1 = Board::new(&[1, 2, 3, 4, 5]);
+        let board2 = Board::new(&[1, 5, 2, 3, 4]);
         let expected = vec![[0, 1]];
         assert_eq!(board1.valid_moves_abs(), expected);
         assert_eq!(board1.valid_moves_rel(), expected);
@@ -419,7 +414,7 @@ pub mod tests {
     fn hashing_double_take() {
         let mut all_board: Vec<Board> = Vec::new();
         for pile in vector_util::all_sequences(5) {
-            all_board.push(Board::new(&pile, 4));
+            all_board.push(Board::new(&pile));
         }
         let mut set: HashSet<Board> = HashSet::new();
         for board in &all_board {
@@ -443,14 +438,11 @@ pub mod tests {
     fn partial_equality_test() {
         let pile1 = [1, 4, 3, 2];
         let pile2 = [1, 4, 2, 3];
-        let mut board1 = Board::new(&pile1, 4);
-        let mut board2 = Board::new(&pile2, 4);
-        let board3 = Board::new(&pile1, 5);
+        let mut board1 = Board::new(&pile1);
+        let mut board2 = Board::new(&pile2);
         assert!(board1 == board1);
         assert!(board2 == board2);
-        assert!(board3 == board3);
         assert!(board1 != board2);
-        assert!(board1 != board3);
 
         board1.perform_move([0, 1]); // [2] [1,4,3]
         board2.perform_move([0, 1]); // [3] [1,4,2]
