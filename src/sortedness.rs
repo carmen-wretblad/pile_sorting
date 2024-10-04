@@ -18,16 +18,15 @@ pub trait Sortedness: Debug {
     fn next_card(&self) -> u8;
     fn depth_of_card(&self, card: u8) -> Option<usize>;
     fn depth_of_next_card(&self) -> usize {
-        self.depth_of_card(self.next_card()).expect(
-            format!(
+        self.depth_of_card(self.next_card()).unwrap_or_else(|| {
+            panic!(
                 "next card must always have a position \n 
                     next card should be: {}
                     given the piles {:?}",
                 self.next_card(),
-                &self,
+                &self
             )
-            .as_str(),
-        )
+        })
     }
     fn order_object(&self) -> OrderObject {
         OrderObject {

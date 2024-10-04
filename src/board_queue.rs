@@ -6,7 +6,7 @@ pub trait BoardQueue {
     fn add(&mut self, boards: Vec<Board>);
     fn next(&mut self) -> Option<Board>;
     fn len(&self) -> usize;
-    fn empty(&self) -> bool;
+    fn is_empty(&self) -> bool;
 }
 pub trait FilterQueue: BoardQueue {
     fn filter(&mut self, predicate: impl Fn(&Board) -> bool) -> Vec<Board>;
@@ -41,7 +41,7 @@ impl BoardQueue for BoardQueueImpl {
     fn len(&self) -> usize {
         self.underlying_structure.len()
     }
-    fn empty(&self) -> bool {
+    fn is_empty(&self) -> bool {
         self.underlying_structure.is_empty()
     }
 }

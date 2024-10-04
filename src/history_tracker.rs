@@ -7,6 +7,7 @@ const BLOCKED: bool = true;
 const USABLE: bool = false;
 
 #[derive(Debug, Clone)]
+
 pub struct HistoryTrackerImpl {
     last_move: Option<AbsMove>,
     blocker_matrix: [[bool; NBR_PILES]; NBR_PILES],
@@ -36,6 +37,11 @@ impl HistoryTrackerImpl {
             last_move: None,
             blocker_matrix: [[false; NBR_PILES]; NBR_PILES],
         }
+    }
+}
+impl Default for HistoryTrackerImpl {
+    fn default() -> Self {
+        Self::new()
     }
 }
 impl HistoryTracker for HistoryTrackerImpl {

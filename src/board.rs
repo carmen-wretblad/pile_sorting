@@ -72,7 +72,7 @@ impl fmt::Display for Board {
 fn cartesian_product(nbr: usize) -> Vec<AbsMove> {
     let x = 0..nbr;
     x.clone()
-        .flat_map(|y| x.clone().map(move |x| [x.clone(), y.clone()]))
+        .flat_map(|y| x.clone().map(move |x| [x, y]))
         .filter(|x| x[0] != x[1])
         .collect()
 }
@@ -81,7 +81,6 @@ impl Board {
     pub fn new(pile: &[u8]) -> Board {
         assert!(pile.len() < MAX_NBR_OF_CARDS + 1);
         assert!(MIN_NBR_OF_CARDS < pile.len() + 1);
-        assert!(MIN_NBR_OF_CARDS < NBR_PILES + 1);
         assert!(!pile.contains(&0u8));
         assert!(vector_util::correct_sequence(pile));
 
@@ -112,7 +111,7 @@ impl Board {
             }
         }
 
-        let board = Board {
+        Self {
             piles: new_piles,
             translator: Translator::new(NBR_PILES),
             nbr_cards: new_nbr_cards,
@@ -121,8 +120,7 @@ impl Board {
             pos_highest_card: 0,
             history: HistoryTrackerImpl::new(),
             last_shrunk: false,
-        };
-        board
+        }
     }
     pub fn new_solved_board() -> Board {
         Board::new(&[3, 2, 1]) //this will get shrunk to [2,1], which is to small to

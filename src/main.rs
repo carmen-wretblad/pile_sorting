@@ -1,4 +1,4 @@
-#[allow(unused, dead_code)]
+#![allow(unused, dead_code)]
 use sorting::bfs::*;
 use sorting::board::Board;
 use sorting::graph_queue_solver;
