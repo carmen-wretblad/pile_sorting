@@ -2,7 +2,8 @@
 use crate::board::*;
 use crate::validator::*;
 use crate::*;
-use std::collections::HashSet;
+//use std::collections::HashSet;
+use fxhash::*;
 
 #[derive(Debug)]
 pub enum MoveChoice {
@@ -14,9 +15,9 @@ pub struct BFS {
     strategy: MoveChoice,
     name: String,
     starting_board: Board,
-    found_boards: HashSet<Board>,
-    next_boards: HashSet<Board>,
-    current_boards: HashSet<Board>,
+    found_boards: FxHashSet<Board>,
+    next_boards: FxHashSet<Board>,
+    current_boards: FxHashSet<Board>,
     pub step_counter: usize,
     solved_board: Option<Board>,
     pub board_counter: usize,
@@ -27,9 +28,9 @@ impl BFS {
             strategy,
             name: "BFS".to_string(),
             starting_board: board.clone(),
-            next_boards: HashSet::new(),
-            current_boards: HashSet::new(),
-            found_boards: HashSet::new(),
+            next_boards: FxHashSet::default(),
+            current_boards: FxHashSet::default(),
+            found_boards: FxHashSet::default(),
             step_counter: 0,
             solved_board: None,
             board_counter: 0,

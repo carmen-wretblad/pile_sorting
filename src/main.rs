@@ -6,6 +6,9 @@ use sorting::node_holder::NodeHolder;
 use sorting::vector_util::{self, all_sequences};
 use sorting::*;
 
+#[global_allocator]
+static GLOBAL: mimallocator::Mimalloc = mimallocator::Mimalloc;
+
 fn main() {
     //stats();
     //test_node_holder();

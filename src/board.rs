@@ -4,9 +4,9 @@ use crate::sortedness::Sortedness;
 use crate::translator::Translator;
 use crate::vector_util;
 use crate::*;
+use fxhash::*;
 use std::fmt;
 use std::hash::{Hash, Hasher};
-
 #[derive(Debug, Clone)]
 /// Representation of a full set of cardpiles.
 /// Piles are always sorted in order of the value of the bottom card, highest to lowest.

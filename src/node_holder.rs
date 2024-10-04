@@ -3,9 +3,7 @@ use crate::board::Board;
 use crate::node_content::NodeContent;
 use crate::sortedness::Sortedness;
 use crate::*;
-use std::collections::HashMap;
-use std::collections::HashSet;
-
+use fxhash::*;
 struct ProgramInfo {
     starting_board: Board,
     end_board: Board,
@@ -18,12 +16,12 @@ pub struct NodeHolder {
     solved_flag: bool,
     new_generation: Vec<(Board, NodeContent)>,
     future_generation: Vec<(Board, NodeContent)>,
-    nodes: HashMap<BoardRep, NodeContent>,
+    nodes: FxHashMap<BoardRep, NodeContent>,
     max_height_previous: usize,
     pub board_counter: usize,
     pub steps: usize,
     past_minimum: usize,
-    pub bad_boards: HashSet<BoardRep>,
+    pub bad_boards: FxHashSet<BoardRep>,
 }
 impl NodeHolder {
     pub fn new(board: &Board) -> Self {
@@ -37,12 +35,12 @@ impl NodeHolder {
             solved_flag: false,
             new_generation: vec![(board.clone(), NodeContent::new())], //todo
             future_generation: Vec::new(),
-            nodes: HashMap::new(),
+            nodes: FxHashMap::default(),
             max_height_previous: board.nbr_cards,
             board_counter: 0,
             steps: 0,
             past_minimum: usize::MAX,
-            bad_boards: HashSet::new(),
+            bad_boards: FxHashSet::default(),
         }
     }
 

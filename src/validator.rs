@@ -3,9 +3,8 @@ use crate::graph::GraphImpl;
 use crate::history_tracker::*;
 use crate::sortedness::Sortedness;
 use crate::*;
-use std::collections::HashSet;
-
-pub fn get_solution(set: &HashSet<Board>, starting_board: &Board) -> RelSolution {
+use fxhash::*;
+pub fn get_solution(set: &FxHashSet<Board>, starting_board: &Board) -> RelSolution {
     let mut board_sequence_inverted: Vec<Board> = Vec::new();
     let solution_board_proxy = Board::new_solved_board();
     let solution_board: Board = set

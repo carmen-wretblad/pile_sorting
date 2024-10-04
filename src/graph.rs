@@ -1,10 +1,10 @@
 use crate::board::*;
 use crate::sortedness::*;
 use crate::*;
+use fxhash::*;
 use petgraph::algo::astar;
 use petgraph::graph::Graph as PGraph;
 use petgraph::graph::NodeIndex;
-use std::collections::HashMap;
 
 pub trait Graph {
     fn new(starting: &Board) -> Self;
@@ -33,8 +33,8 @@ pub trait DebugGraph: Graph {
 #[derive(Debug, Clone)]
 pub struct GraphImpl {
     underlying_structure: PGraph<BoardRep, RelMove>,
-    seen_nodes: HashMap<Board, NodeIndex>,
-    board_rep_for_index: HashMap<NodeIndex, Board>,
+    seen_nodes: FxHashMap<Board, NodeIndex>,
+    board_rep_for_index: FxHashMap<NodeIndex, Board>,
     index_starting_pile: Option<NodeIndex>,
     index_solution_pile: Option<NodeIndex>,
 }
@@ -42,8 +42,8 @@ impl Graph for GraphImpl {
     fn new(starting: &Board) -> Self {
         let mut graph = Self {
             underlying_structure: PGraph::<BoardRep, RelMove>::new(),
-            seen_nodes: HashMap::new(),
-            board_rep_for_index: HashMap::new(),
+            seen_nodes: FxHashMap::default(),
+            board_rep_for_index: FxHashMap::default(),
             index_starting_pile: None,
             index_solution_pile: None,
         };
