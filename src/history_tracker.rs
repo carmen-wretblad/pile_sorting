@@ -1,5 +1,5 @@
 use crate::translator::Translator;
-use crate::{AbsMove, NBR_PILES};
+use crate::*;
 
 // IDEA: use a singular vec and translate the indicies instead
 

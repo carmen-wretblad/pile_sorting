@@ -1,24 +1,11 @@
 use crate::history_tracker::HistoryTracker;
 use crate::history_tracker::HistoryTrackerImpl;
 use crate::sortedness::Sortedness;
-use crate::BoardRep;
-//  ##### TODO #######
-// Look into the possibility of using mem::swap for replacing values
-// Consider tracking higest and lowest card for each pile
-// ######
-use crate::config::*;
 use crate::translator::Translator;
 use crate::vector_util;
-use crate::AbsMove;
-use crate::RelMove;
-use crate::NBR_PILES;
-use core::panic;
+use crate::*;
 use std::fmt;
 use std::hash::{Hash, Hasher};
-use std::usize;
-use std::vec;
-
-pub const SOLUTION_PILE: [u8; 2] = [2, 1];
 
 #[derive(Debug, Clone)]
 /// Representation of a full set of cardpiles.

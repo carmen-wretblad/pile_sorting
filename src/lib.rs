@@ -2,6 +2,7 @@
 // --- Hardcoded ---
 pub const MAX_NBR_OF_CARDS: usize = 100;
 pub const MIN_NBR_OF_CARDS: usize = 3;
+pub const SOLUTION_PILE: [u8; 2] = [2, 1];
 // --- Config ---
 pub const VALIDATOR_SHOULD_PRINT: bool = true;
 pub const BFS_SHOULD_PRINT_FOUND_BOARDS: bool = false;
@@ -17,7 +18,6 @@ pub type AbsSolution = Vec<AbsMove>;
 pub mod bfs;
 pub mod board;
 pub mod board_queue;
-pub mod config;
 pub mod graph;
 pub mod graph_queue_solver;
 pub mod history_tracker;

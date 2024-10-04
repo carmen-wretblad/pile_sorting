@@ -2,7 +2,7 @@ use crate::board::*;
 use crate::board_queue::*;
 use crate::graph::*;
 use crate::validator::*;
-use crate::RelSolution;
+use crate::*;
 
 pub struct GraphQueueSolverImpl {
     graph: GraphImpl,

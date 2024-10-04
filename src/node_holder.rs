@@ -1,12 +1,10 @@
 #[allow(unused, dead_code)]
 use crate::board::Board;
 use crate::node_content::NodeContent;
-
 use crate::sortedness::Sortedness;
-use crate::BoardRep;
+use crate::*;
 use std::collections::HashMap;
 use std::collections::HashSet;
-use std::usize;
 
 struct ProgramInfo {
     starting_board: Board,

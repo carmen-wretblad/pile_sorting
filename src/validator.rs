@@ -2,7 +2,6 @@ use crate::board::*;
 use crate::graph::GraphImpl;
 use crate::history_tracker::*;
 use crate::sortedness::Sortedness;
-use crate::RelSolution;
 use crate::*;
 use std::collections::HashSet;
 

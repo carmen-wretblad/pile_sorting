@@ -1,5 +1,4 @@
-use crate::BoardRep;
-use crate::RelMove;
+use crate::*;
 #[derive(PartialEq, Eq, Clone)]
 enum NodeStatus {
     Building,

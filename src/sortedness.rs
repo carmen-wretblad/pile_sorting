@@ -1,4 +1,5 @@
-use crate::{board::Board, BoardRep};
+use crate::board::Board;
+use crate::*;
 use std::cmp::{max, Ord};
 use std::fmt::Debug;
 

@@ -1,13 +1,10 @@
-use std::collections::HashMap;
-
 use crate::board::*;
 use crate::sortedness::*;
-use crate::BoardRep;
-use crate::RelMove;
-use crate::RelSolution;
+use crate::*;
 use petgraph::algo::astar;
 use petgraph::graph::Graph as PGraph;
 use petgraph::graph::NodeIndex;
+use std::collections::HashMap;
 
 pub trait Graph {
     fn new(starting: &Board) -> Self;

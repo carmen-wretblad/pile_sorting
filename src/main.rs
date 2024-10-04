@@ -1,10 +1,11 @@
 #[allow(unused, dead_code)]
-use ::sorting::bfs::BFS;
-use ::sorting::board::Board;
-
+use sorting::bfs::*;
+use sorting::board::Board;
+use sorting::graph_queue_solver;
 use sorting::node_holder::NodeHolder;
 use sorting::vector_util::{self, all_sequences};
-use sorting::{bfs, graph_queue_solver};
+use sorting::*;
+
 fn main() {
     //stats();
     //test_node_holder();

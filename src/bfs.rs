@@ -1,12 +1,9 @@
 #![allow(unused, dead_code)]
-
-use crate::RelSolution;
-
+use crate::board::*;
 use crate::validator::*;
 use crate::*;
-use crate::{board, validator};
-use crate::{board::*, AbsMove, RelMove};
 use std::collections::HashSet;
+
 #[derive(Debug)]
 pub enum MoveChoice {
     Valid,
