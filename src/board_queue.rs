@@ -1,5 +1,6 @@
 use crate::{board::Board, sortedness::Sortedness};
 use priority_queue::priority_queue::PriorityQueue;
+use std::cmp::Reverse;
 
 pub trait BoardQueue {
     fn add_single(&mut self, board: Board);
@@ -12,7 +13,7 @@ pub trait FilterQueue: BoardQueue {
     fn filter(&mut self, predicate: impl Fn(&Board) -> bool) -> Vec<Board>;
 }
 pub struct BoardQueueImpl {
-    underlying_structure: PriorityQueue<Board, usize>,
+    underlying_structure: PriorityQueue<Board, Reverse<usize>>,
 }
 impl BoardQueueImpl {
     pub fn new(starting_board: Board) -> BoardQueueImpl {
@@ -26,7 +27,7 @@ impl BoardQueueImpl {
 impl BoardQueue for BoardQueueImpl {
     fn add_single(&mut self, board: Board) {
         self.underlying_structure
-            .push(board.clone(), usize::MAX - board.theoretical_minimum());
+            .push(board.clone(), Reverse(board.theoretical_minimum()));
     }
     fn add(&mut self, boards: Vec<Board>) {
         for board in boards {
